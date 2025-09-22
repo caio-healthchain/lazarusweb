@@ -5,7 +5,7 @@ export const msalConfig: Configuration = {
   auth: {
     clientId: import.meta.env.VITE_AZURE_CLIENT_ID || "demo-client-id",
     authority: import.meta.env.VITE_AZURE_AUTHORITY || "https://login.microsoftonline.com/demo-tenant",
-    redirectUri: import.meta.env.VITE_AZURE_REDIRECT_URI || "https://calm-meadow-0a9b85810.2.azurestaticapps.net/",
+    redirectUri: import.meta.env.VITE_AZURE_REDIRECT_URI || "https://lazarus.healthchainsolutions.com.br/",
   },
   cache: {
     cacheLocation: "sessionStorage",
@@ -20,7 +20,7 @@ export const loginRequest: PopupRequest = {
 
 // Configuração da API
 export const API_CONFIG = {
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://172.169.27.140/api/v1',
+  baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://wiki-odds-band-extraction.trycloudflare.com/api/v1',
   endpoints: {
     // Microsserviços
     patients: '/patients',
