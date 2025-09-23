@@ -12,6 +12,9 @@ import Index from "./pages/Index";
 import PatientList from "./pages/PatientList";
 import PatientDetails from "./pages/PatientDetails";
 import Login from "./pages/Login";
+import ModuleSelection from "./pages/ModuleSelection";
+import ManagerialDashboard from "./pages/ManagerialDashboard";
+import ManagerialChat from "./pages/ManagerialChat";
 import NotFound from "./pages/NotFound";
 
 // Components
@@ -41,7 +44,33 @@ const App = () => (
             {/* Rota pública de login */}
             <Route path="/login" element={<Login />} />
             
-            {/* Rotas protegidas */}
+            {/* Seleção de módulos */}
+            <Route path="/modules" element={
+              <ProtectedRoute>
+                <ModuleSelection />
+              </ProtectedRoute>
+            } />
+            
+            {/* Módulo Gerencial */}
+            <Route path="/gerencial" element={
+              <ProtectedRoute>
+                <div className="min-h-screen bg-background">
+                  <Header />
+                  <ManagerialDashboard />
+                </div>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/gerencial/chat" element={
+              <ProtectedRoute>
+                <div className="min-h-screen bg-background">
+                  <Header />
+                  <ManagerialChat />
+                </div>
+              </ProtectedRoute>
+            } />
+            
+            {/* Módulo Auditor - Rota principal */}
             <Route path="/" element={
               <ProtectedRoute>
                 <div className="min-h-screen bg-background">
