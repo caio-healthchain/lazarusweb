@@ -20,7 +20,7 @@ export const loginRequest: PopupRequest = {
 
 // Configuração da API
 export const API_CONFIG = {
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://wiki-odds-band-extraction.trycloudflare.com/api/v1',
+  baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://healthchain-apim.azure-api.net/api/v1',
   endpoints: {
     // Microsserviços
     patients: '/patients',
