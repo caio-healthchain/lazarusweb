@@ -20,18 +20,18 @@ export const loginRequest: PopupRequest = {
 
 // Configuração da API
 export const API_CONFIG = {
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://healthchain-apim.azure-api.net/api/v1',
+  baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://lazarusgateway.azure-api.net',
   endpoints: {
     // Microsserviços
-    patients: '/patients',
-    procedures: '/procedures', 
-    billing: '/billings',
-    audit: '/audits',
-    aiAgents: '/aiagents',
-    dialogues: '/dialogues',
-    hospitals: '/hospitals',
-    rag: '/rags',
-    rules: '/rules',
+    patients: '/patients/patients',
+    procedures: '/procedures/procedures', 
+    billing: '/billings/billings',
+    audit: '/audits/audits',
+    aiAgents: '/aiagents/aiagents',
+    dialogues: '/dialogues/dialogues',
+    hospitals: '/hospitals/hospitals',
+    rag: '/rags/rags',
+    rules: '/rules/rules',
     
     // Endpoints específicos do sistema
     validations: '/validations',
