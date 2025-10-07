@@ -99,7 +99,7 @@ const createApiClient = (): AxiosInstance => {
   client.interceptors.request.use(
     (config) => {
       const { accessToken } = useAuthStore.getState();
-      if (accessToken && accessToken !== 'demo-token-123') {
+      if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
       return config;

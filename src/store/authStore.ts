@@ -49,17 +49,20 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   loginDemo: () => {
     const demoUser: User = {
-      id: 'demo-user-123',
+      id: 'test-admin-123',
       name: 'Dr. João Silva',
-      email: 'joao.silva@hospital.com.br',
+      email: 'admin@lazarus.com',
       roles: ['admin', 'auditor'],
       avatar: undefined,
     };
     
+    // Token JWT real fornecido pelo usuário para testes
+    const demoToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LWFkbWluLTEyMyIsImVtYWlsIjoiYWRtaW5AbGF6YXJ1cy5jb20iLCJyb2xlIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJjcmVhdGU6cGF0aWVudCIsInJlYWQ6cGF0aWVudCIsInVwZGF0ZTpwYXRpZW50IiwiZGVsZXRlOnBhdGllbnQiLCJtYW5hZ2U6cGF0aWVudHMiXSwiaWF0IjoxNzU5ODY5OTE3LCJleHAiOjE3NTk5NTYzMTd9.abCnFn9X26KpXWSqD1g1cyihfbiADzuFw1y2Q76aZSQ';
+    
     set({ 
       isAuthenticated: true,
       user: demoUser,
-      accessToken: 'demo-token-123',
+      accessToken: demoToken,
       isLoading: false,
     });
   },
