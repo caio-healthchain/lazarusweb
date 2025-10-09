@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { AccountInfo } from '@azure/msal-browser';
 import { UserRole } from '@/config/auth';
+import { generateDemoTokenSync } from '@/utils/jwtGenerator';
+
 
 interface User {
   id: string;
@@ -104,8 +106,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       avatar: undefined,
     };
     
-    // Gerar token JWT dinamicamente (versão síncrona)
-    const { generateDemoTokenSync } = require('@/utils/jwtGenerator');
+    // Removed require statement because generateDemoTokenSync is imported above.
     const demoToken = generateDemoTokenSync(24); // Token válido por 24 horas
     
     const authState = {
