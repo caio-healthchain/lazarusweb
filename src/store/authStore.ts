@@ -27,25 +27,73 @@ interface AuthState {
   loginDemo: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  isAuthenticated: false,
-  isLoading: false,
-  user: null,
-  accessToken: null,
+// Carregar estado inicial do localStorage
+const loadInitialState = () => {
+  try {
+    const storedAuth = localStorage.getItem('lazarus_auth');
+    if (storedAuth) {
+      const parsed = JSON.parse(storedAuth);
+      return {
+        isAuthenticated: parsed.isAuthenticated || false,
+        user: parsed.user || null,
+        accessToken: parsed.accessToken || null,
+        isLoading: false,
+      };
+    }
+  } catch (error) {
+    console.error('Erro ao carregar autenticação:', error);
+  }
+  return {
+    isAuthenticated: false,
+    isLoading: false,
+    user: null,
+    accessToken: null,
+  };
+};
 
-  setAuthenticated: (authenticated) => set({ isAuthenticated: authenticated }),
+export const useAuthStore = create<AuthState>((set) => ({
+  ...loadInitialState(),
+
+  setAuthenticated: (authenticated) => {
+    set({ isAuthenticated: authenticated });
+    const current = useAuthStore.getState();
+    localStorage.setItem('lazarus_auth', JSON.stringify({
+      isAuthenticated: authenticated,
+      user: current.user,
+      accessToken: current.accessToken,
+    }));
+  },
   
   setLoading: (loading) => set({ isLoading: loading }),
   
-  setUser: (user) => set({ user }),
+  setUser: (user) => {
+    set({ user });
+    const current = useAuthStore.getState();
+    localStorage.setItem('lazarus_auth', JSON.stringify({
+      isAuthenticated: current.isAuthenticated,
+      user,
+      accessToken: current.accessToken,
+    }));
+  },
   
-  setAccessToken: (token) => set({ accessToken: token }),
+  setAccessToken: (token) => {
+    set({ accessToken: token });
+    const current = useAuthStore.getState();
+    localStorage.setItem('lazarus_auth', JSON.stringify({
+      isAuthenticated: current.isAuthenticated,
+      user: current.user,
+      accessToken: token,
+    }));
+  },
   
-  logout: () => set({ 
-    isAuthenticated: false, 
-    user: null, 
-    accessToken: null 
-  }),
+  logout: () => {
+    set({ 
+      isAuthenticated: false, 
+      user: null, 
+      accessToken: null 
+    });
+    localStorage.removeItem('lazarus_auth');
+  },
 
   loginDemo: () => {
     const demoUser: User = {
@@ -56,14 +104,27 @@ export const useAuthStore = create<AuthState>((set) => ({
       avatar: undefined,
     };
     
-    // Token JWT real fornecido pelo usuário para testes
-    const demoToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LWFkbWluLTEyMyIsImVtYWlsIjoiYWRtaW5AbGF6YXJ1cy5jb20iLCJyb2xlIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJjcmVhdGU6cGF0aWVudCIsInJlYWQ6cGF0aWVudCIsInVwZGF0ZTpwYXRpZW50IiwiZGVsZXRlOnBhdGllbnQiLCJtYW5hZ2U6cGF0aWVudHMiXSwiaWF0IjoxNzU5OTcwOTY1LCJleHAiOjE3NjAwNTczNjV9.PQLTH4QszyCvt3uLb44rSdkZKNbbyFit6KT4Xl98O7g';
+    // Gerar token JWT dinamicamente (versão síncrona)
+    const { generateDemoTokenSync } = require('@/utils/jwtGenerator');
+    const demoToken = generateDemoTokenSync(24); // Token válido por 24 horas
     
-    set({ 
+    const authState = {
       isAuthenticated: true,
       user: demoUser,
       accessToken: demoToken,
       isLoading: false,
-    });
+    };
+    
+    set(authState);
+    
+    // Persistir no localStorage
+    localStorage.setItem('lazarus_auth', JSON.stringify({
+      isAuthenticated: true,
+      user: demoUser,
+      accessToken: demoToken,
+    }));
+    
+    console.log('✅ Login demo realizado com sucesso');
+    console.log('🔐 Token gerado e válido por 24 horas');
   },
 }));

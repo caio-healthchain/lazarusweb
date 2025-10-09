@@ -6,11 +6,13 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MsalProvider } from "@azure/msal-react";
 import { PublicClientApplication } from "@azure/msal-browser";
 import { msalConfig } from "@/config/auth";
+import { useTokenRenewal } from "@/hooks/useTokenRenewal";
 
 // Pages
 import Index from "./pages/Index";
 import PatientList from "./pages/PatientList";
 import PatientDetails from "./pages/PatientDetails";
+import PatientForm from "./pages/PatientForm";
 import Login from "./pages/Login";
 import ModuleSelection from "./pages/ModuleSelection";
 import ManagerialDashboard from "./pages/ManagerialDashboard";
@@ -33,13 +35,12 @@ const queryClient = new QueryClient({
 
 const msalInstance = new PublicClientApplication(msalConfig);
 
-const App = () => (
-  <MsalProvider instance={msalInstance}>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+// Componente interno que usa o hook
+const AppContent = () => {
+  useTokenRenewal(); // Ativa renovação automática de token
+  
+  return (
+    <BrowserRouter>
           <Routes>
             {/* Rota pública de login */}
             <Route path="/login" element={<Login />} />
@@ -76,6 +77,15 @@ const App = () => (
                 <div className="min-h-screen bg-background">
                   <Header />
                   <PatientList />
+                </div>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/patient/new" element={
+              <ProtectedRoute>
+                <div className="min-h-screen bg-background">
+                  <Header />
+                  <PatientForm />
                 </div>
               </ProtectedRoute>
             } />
@@ -141,7 +151,17 @@ const App = () => (
             {/* Rota 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
+    </BrowserRouter>
+  );
+};
+
+const App = () => (
+  <MsalProvider instance={msalInstance}>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AppContent />
       </TooltipProvider>
     </QueryClientProvider>
   </MsalProvider>
