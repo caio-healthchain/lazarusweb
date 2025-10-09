@@ -57,7 +57,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     };
     
     // Token JWT real fornecido pelo usuário para testes
-    const demoToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LWFkbWluLTEyMyIsImVtYWlsIjoiYWRtaW5AbGF6YXJ1cy5jb20iLCJyb2xlIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJjcmVhdGU6cGF0aWVudCIsInJlYWQ6cGF0aWVudCIsInVwZGF0ZTpwYXRpZW50IiwiZGVsZXRlOnBhdGllbnQiLCJtYW5hZ2U6cGF0aWVudHMiXSwiaWF0IjoxNzU5ODY5OTE3LCJleHAiOjE3NTk5NTYzMTd9.abCnFn9X26KpXWSqD1g1cyihfbiADzuFw1y2Q76aZSQ';
+    const demoToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ0ZXN0LWFkbWluLTEyMyIsImVtYWlsIjoiYWRtaW5AbGF6YXJ1cy5jb20iLCJyb2xlIjoiYWRtaW4iLCJwZXJtaXNzaW9ucyI6WyJjcmVhdGU6cGF0aWVudCIsInJlYWQ6cGF0aWVudCIsInVwZGF0ZTpwYXRpZW50IiwiZGVsZXRlOnBhdGllbnQiLCJtYW5hZ2U6cGF0aWVudHMiXSwiaWF0IjoxNzU5OTcwOTY1LCJleHAiOjE3NjAwNTczNjV9.PQLTH4QszyCvt3uLb44rSdkZKNbbyFit6KT4Xl98O7g';
     
     set({ 
       isAuthenticated: true,
