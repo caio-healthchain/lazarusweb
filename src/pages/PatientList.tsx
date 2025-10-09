@@ -98,13 +98,15 @@ const PatientList = () => {
   ];
 
   // Usar dados da API ou fallback para mock
-  const patients = patientsResponse?.data || mockPatients;
+  // Garantir que patients seja sempre um array
+  const patients = Array.isArray(patientsResponse?.data) ? patientsResponse.data : 
+                   (patientsResponse?.data ? [] : mockPatients);
 
-  const filteredPatients = patients.filter(patient =>
+  const filteredPatients = Array.isArray(patients) ? patients.filter(patient =>
     patient.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.medicalRecordNumber.includes(searchTerm) ||
     (patient.healthPlan && patient.healthPlan.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  ) : [];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -240,10 +242,20 @@ const PatientList = () => {
           <Card>
             <CardContent className="text-center py-12">
               <User className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">Nenhum paciente encontrado</h3>
-              <p className="text-muted-foreground">
-                Não há pacientes que correspondam aos critérios de busca.
+              <h3 className="text-lg font-medium mb-2">
+                {searchTerm ? 'Nenhum paciente encontrado' : 'Nenhum paciente cadastrado'}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {searchTerm 
+                  ? 'Não há pacientes que correspondam aos critérios de busca.' 
+                  : 'A base de dados está vazia. Adicione um novo paciente para começar.'}
               </p>
+              {!searchTerm && (
+                <Button onClick={handleNewPatient}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Primeiro Paciente
+                </Button>
+              )}
             </CardContent>
           </Card>
         )}
