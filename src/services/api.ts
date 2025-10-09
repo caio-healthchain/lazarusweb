@@ -197,12 +197,21 @@ export const billingService = {
     apiClient.put<ApiResponse<Billing>>(`${API_CONFIG.endpoints.billing}/${id}`, data),
 };
 
+export interface AuditLog {
+  id: string;
+  patientId?: string;
+  status: string;
+  details?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const auditService = {
   getAll: (params?: { patientId?: string; status?: string }) =>
-    apiClient.get<PaginatedResponse<any>>(API_CONFIG.endpoints.audit, { params }),
+    apiClient.get<PaginatedResponse<AuditLog>>(API_CONFIG.endpoints.audit, { params }),
   
-  createAuditLog: (data: any) =>
-    apiClient.post<ApiResponse<any>>(API_CONFIG.endpoints.audit, data),
+  createAuditLog: (data: AuditLog) =>
+    apiClient.post<ApiResponse<AuditLog>>(API_CONFIG.endpoints.audit, data),
 };
 
 // Health check para microsserviços
