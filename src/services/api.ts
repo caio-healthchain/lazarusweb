@@ -112,7 +112,16 @@ const createApiClient = (): AxiosInstance => {
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
-        // Token expirado ou inválido
+        const { user } = useAuthStore.getState();
+        
+        // Se for usuário demo, não fazer logout automático
+        // Apenas logar o erro e deixar o componente tratar com fallback
+        if (user?.id === 'test-admin-123') {
+          console.warn('⚠️ API retornou 401 - Usando dados de demonstração');
+          return Promise.reject(error);
+        }
+        
+        // Para usuários reais, fazer logout
         const { logout } = useAuthStore.getState();
         logout();
         window.location.href = '/login';
