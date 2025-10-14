@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { AccountInfo } from '@azure/msal-browser';
 import { UserRole } from '@/config/auth';
-import { generateDemoTokenSync } from '@/utils/jwtGenerator';
+import { generateDemoToken } from '@/utils/jwtGenerator';
 
 interface User {
   id: string;
@@ -25,8 +25,8 @@ interface AuthState {
   setAccessToken: (token: string | null) => void;
   logout: () => void;
   
-  // Demo login
-  loginDemo: () => void;
+  // Demo login (async)
+  loginDemo: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -51,7 +51,7 @@ export const useAuthStore = create<AuthState>()(
         accessToken: null 
       }),
 
-      loginDemo: () => {
+      loginDemo: async () => {
         const demoUser: User = {
           id: 'test-admin-123',
           name: 'Dr. João Silva',
@@ -60,7 +60,8 @@ export const useAuthStore = create<AuthState>()(
           avatar: undefined,
         };
         
-        const demoToken = generateDemoTokenSync(24); // Token válido por 24 horas
+        // Gerar token com HMAC-SHA256 real
+        const demoToken = await generateDemoToken(24); // Token válido por 24 horas
         
         set({ 
           isAuthenticated: true,
@@ -70,7 +71,7 @@ export const useAuthStore = create<AuthState>()(
         });
         
         console.log('✅ Login demo realizado com sucesso');
-        console.log('🔐 Token gerado e válido por 24 horas');
+        console.log('🔐 Token JWT válido gerado com HMAC-SHA256');
       },
     }),
     {

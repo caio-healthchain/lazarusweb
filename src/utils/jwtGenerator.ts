@@ -1,6 +1,6 @@
 /**
  * Gerador de Token JWT para Autenticação Demo
- * Abordagem simplificada e pragmática para ambiente de desenvolvimento
+ * Usa Web Crypto API para gerar assinatura HMAC-SHA256 compatível com o backend
  */
 
 interface TokenPayload {
@@ -13,14 +13,76 @@ interface TokenPayload {
 }
 
 /**
- * Gera um token JWT válido para o usuário demo
- * Usa o mesmo formato do script gerar-token-jwt.js do backend
- * 
- * NOTA: Para produção, este token deve ser gerado pelo backend após autenticação real
+ * Secret usado no serviço (mesmo do .env do backend)
+ * IMPORTANTE: Em produção, isso deve vir de variável de ambiente
  */
-export const generateDemoTokenSync = (expiresInHours: number = 24): string => {
+const JWT_SECRET = 'your-super-secret-jwt-key-change-this-in-production';
+
+/**
+ * Converte ArrayBuffer para base64url (formato JWT)
+ */
+const arrayBufferToBase64Url = (buffer: ArrayBuffer): string => {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  const base64 = btoa(binary);
+  return base64
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+};
+
+/**
+ * Converte string para base64url (formato JWT)
+ */
+const stringToBase64Url = (str: string): string => {
+  const base64 = btoa(unescape(encodeURIComponent(str)));
+  return base64
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '');
+};
+
+/**
+ * Gera assinatura HMAC-SHA256 usando Web Crypto API
+ */
+const generateHmacSignature = async (data: string, secret: string): Promise<string> => {
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(secret);
+  const messageData = encoder.encode(data);
+
+  // Importar a chave
+  const key = await crypto.subtle.importKey(
+    'raw',
+    keyData,
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+
+  // Gerar assinatura
+  const signature = await crypto.subtle.sign('HMAC', key, messageData);
+  
+  return arrayBufferToBase64Url(signature);
+};
+
+/**
+ * Gera um token JWT válido para o usuário demo
+ * Usa HMAC-SHA256 real, compatível com o backend
+ * 
+ * @param expiresInHours Tempo de expiração em horas (padrão: 24h)
+ * @returns Promise com o token JWT assinado
+ */
+export const generateDemoToken = async (expiresInHours: number = 24): Promise<string> => {
   const now = Math.floor(Date.now() / 1000);
   
+  const header = {
+    alg: 'HS256',
+    typ: 'JWT'
+  };
+
   const payload: TokenPayload = {
     userId: 'test-admin-123',
     email: 'admin@lazarus.com',
@@ -36,51 +98,45 @@ export const generateDemoTokenSync = (expiresInHours: number = 24): string => {
     exp: now + (expiresInHours * 60 * 60),
   };
 
-  // Criar token no formato JWT: header.payload.signature
-  const header = { alg: 'HS256', typ: 'JWT' };
-  
-  // Base64URL encode
-  const base64UrlEncode = (obj: any) => {
-    const json = JSON.stringify(obj);
-    const base64 = btoa(unescape(encodeURIComponent(json)));
-    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-  };
-
-  const encodedHeader = base64UrlEncode(header);
-  const encodedPayload = base64UrlEncode(payload);
-  
-  // Para demo, criar uma assinatura simples
-  // Em produção, o backend gera isso com HMAC-SHA256 usando o secret
-  const secret = 'your-super-secret-jwt-key-change-this-in-production';
+  const encodedHeader = stringToBase64Url(JSON.stringify(header));
+  const encodedPayload = stringToBase64Url(JSON.stringify(payload));
   const dataToSign = `${encodedHeader}.${encodedPayload}`;
   
-  // Simular assinatura (não é criptograficamente segura, apenas para demo)
-  let hash = 0;
-  for (let i = 0; i < dataToSign.length + secret.length; i++) {
-    const char = (dataToSign + secret).charCodeAt(i % (dataToSign + secret).length);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
+  const signature = await generateHmacSignature(dataToSign, JWT_SECRET);
+  const token = `${dataToSign}.${signature}`;
   
-  const signature = base64UrlEncode({ hash: Math.abs(hash).toString(36) });
-  
-  const token = `${encodedHeader}.${encodedPayload}.${signature}`;
-  
-  console.log('🔐 Token JWT gerado:', {
+  console.log('🔐 Token JWT gerado (HMAC-SHA256):', {
     userId: payload.userId,
     email: payload.email,
     role: payload.role,
     expiresAt: new Date(payload.exp * 1000).toISOString(),
-    remainingHours: expiresInHours,
+    validFor: `${expiresInHours} horas`,
   });
 
   return token;
 };
 
 /**
- * Decodifica um token JWT
+ * Versão síncrona - usa generateDemoToken internamente mas retorna string vazia temporariamente
+ * O token real será gerado de forma assíncrona
  */
-const decodeBase64Url = (str: string): string => {
+export const generateDemoTokenSync = (expiresInHours: number = 24): string => {
+  console.warn('⚠️ generateDemoTokenSync está deprecated');
+  console.warn('💡 Use await generateDemoToken() para token válido');
+  
+  // Gerar token assíncrono em background
+  generateDemoToken(expiresInHours).then(token => {
+    console.log('✅ Token gerado:', token);
+  });
+  
+  // Retornar token temporário (será substituído pelo async)
+  return 'generating...';
+};
+
+/**
+ * Decodifica a parte base64url do JWT
+ */
+const base64urlDecode = (str: string): string => {
   let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
   while (base64.length % 4) {
     base64 += '=';
@@ -102,7 +158,7 @@ export const decodeToken = (token: string): TokenPayload | null => {
       return null;
     }
 
-    const payload = JSON.parse(decodeBase64Url(parts[1]));
+    const payload = JSON.parse(base64urlDecode(parts[1]));
     return payload as TokenPayload;
   } catch (error) {
     console.error('Erro ao decodificar token:', error);

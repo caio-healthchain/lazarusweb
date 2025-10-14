@@ -80,14 +80,19 @@ const Login = () => {
     }
   };
 
-  const handleDemoLogin = () => {
+  const handleDemoLogin = async () => {
     // Por enquanto, acesso direto (conforme solicitado)
     setLoading(true);
     
-    setTimeout(() => {
-      loginDemo();
+    try {
+      await loginDemo();
       toast.success('Login demo realizado com sucesso!');
-    }, 1000);
+    } catch (error) {
+      console.error('Erro ao gerar token:', error);
+      toast.error('Erro ao fazer login demo');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleAccessFormSubmit = (e: React.FormEvent) => {
