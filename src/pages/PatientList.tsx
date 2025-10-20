@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge"; 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Search, Plus, User, Calendar, MapPin, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -155,10 +155,16 @@ const PatientList = () => {
               </Alert>
             )}
           </div>
-          <Button onClick={handleNewPatient}>
-            <Plus className="h-4 w-4 mr-2" />
-            Novo Paciente
-          </Button>
+          <div className="flex space-x-2">
+            <Button onClick={() => navigate('/audit/new')} variant="outline">
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Auditoria
+            </Button>
+            <Button onClick={handleNewPatient}>
+              <Plus className="h-4 w-4 mr-2" />
+              Novo Paciente
+            </Button>
+          </div>
         </div>
 
         <div className="mb-6">

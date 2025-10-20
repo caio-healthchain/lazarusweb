@@ -102,6 +102,12 @@ const createApiClient = (): AxiosInstance => {
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
+
+      // Para uploads de arquivo, o navegador deve definir o Content-Type automaticamente.
+      if (config.data instanceof FormData) {
+        delete config.headers['Content-Type'];
+      }
+
       return config;
     },
     (error) => Promise.reject(error)
@@ -221,6 +227,22 @@ export const auditService = {
   
   createAuditLog: (data: AuditLog) =>
     apiClient.post<ApiResponse<AuditLog>>(API_CONFIG.endpoints.audit, data),
+
+  uploadAuditFile: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient.post<ApiResponse<{ id: string }>>(`http://localhost:3001/api/upload`, formData);
+  }
+};
+
+// Serviço de Upload
+export const uploadService = {
+  uploadTissXml: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient.post<ApiResponse<any>>(`http://localhost:3001/api/upload`, formData);
+    //return apiClient.post<ApiResponse<any>>(`${API_CONFIG.endpoints.patients}/upload-tiss`, formData);
+  }
 };
 
 // Health check para microsserviços
