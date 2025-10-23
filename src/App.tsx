@@ -17,6 +17,7 @@ import Login from "./pages/Login";
 import ModuleSelection from "./pages/ModuleSelection";
 import ManagerialDashboard from "./pages/ManagerialDashboard";
 import ManagerialChat from "./pages/ManagerialChat";
+import NewAudit from "./pages/NewAudit";
 import NotFound from "./pages/NotFound";
 
 // Components
@@ -95,6 +96,15 @@ const AppContent = () => {
                 <div className="min-h-screen bg-background">
                   <Header />
                   <PatientDetails />
+                </div>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/audit/new" element={
+              <ProtectedRoute>
+                <div className="min-h-screen bg-background">
+                  <Header />
+                  <NewAudit />
                 </div>
               </ProtectedRoute>
             } />

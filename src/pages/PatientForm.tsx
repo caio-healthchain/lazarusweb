@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,11 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, Save, Upload, FileText, User, AlertCircle, CheckCircle2 } from "lucide-react";
-import { patientsService } from "@/services/api";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ArrowLeft, Save, Upload, FileText, User, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { patientsService, uploadService } from "@/services/api";
 import { toast } from "sonner";
-import { parseXMLToPatient } from "@/utils/xmlParser";
 
 interface PatientFormData {
   fullName: string;
@@ -33,9 +32,11 @@ interface PatientFormData {
 }
 
 const PatientForm = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [xmlFile, setXmlFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [xmlParsed, setXmlParsed] = useState(false);
   const [formData, setFormData] = useState<PatientFormData>({
     fullName: "",
@@ -56,6 +57,8 @@ const PatientForm = () => {
     accommodationType: "shared",
   });
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleInputChange = (field: keyof PatientFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -64,36 +67,43 @@ const PatientForm = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    if (!file.name.endsWith('.xml')) {
-      toast.error('Por favor, selecione um arquivo XML válido');
+    if (!file.name.endsWith('.xml') && !file.name.endsWith('.zip')) {
+      toast.error('Por favor, selecione um arquivo XML ou ZIP válido');
       return;
     }
 
     setXmlFile(file);
+    setIsUploading(true);
+    setXmlParsed(false);
 
     try {
-      const text = await file.text();
-      const parsedData = parseXMLToPatient(text);
-      
+      const response = await uploadService.uploadTissXml(file);
+      const parsedData = response.data.data;
+
       if (parsedData) {
         setFormData(prev => ({
           ...prev,
           ...parsedData,
+          admissionDate: parsedData.admissionDate ? new Date(parsedData.admissionDate).toISOString().split('T')[0] : prev.admissionDate,
+          birthDate: parsedData.birthDate ? new Date(parsedData.birthDate).toISOString().split('T')[0] : prev.birthDate,
+          insuranceValidity: parsedData.insuranceValidity ? new Date(parsedData.insuranceValidity).toISOString().split('T')[0] : prev.insuranceValidity,
         }));
         setXmlParsed(true);
         toast.success('XML processado com sucesso! Complete os dados faltantes.');
       } else {
-        toast.warning('XML processado, mas alguns dados não puderam ser extraídos. Preencha manualmente.');
+        toast.warning('API processou o XML, mas alguns dados não puderam ser extraídos. Preencha manualmente.');
       }
     } catch (error) {
       console.error('Erro ao processar XML:', error);
       toast.error('Erro ao processar o arquivo XML');
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const validateForm = (): boolean => {
     const requiredFields: (keyof PatientFormData)[] = [
-      'fullName', 'cpf', 'rg', 'birthDate', 'gender', 
+      'fullName', 'cpf', 'rg', 'birthDate', 'gender',
       'phone', 'email', 'address', 'medicalRecordNumber'
     ];
 
@@ -174,7 +184,7 @@ const PatientForm = () => {
       };
 
       await patientsService.create(patientData);
-      
+
       toast.success('Paciente cadastrado com sucesso!');
       navigate('/');
     } catch (error: any) {
@@ -230,16 +240,21 @@ const PatientForm = () => {
                     <div className="text-sm text-gray-600 mb-2">
                       Arraste um arquivo XML ou clique para selecionar
                     </div>
-                    <Input
+                    <input
                       id="xml-upload"
                       type="file"
-                      accept=".xml"
+                      accept=".xml,.zip"
                       onChange={handleXMLUpload}
                       className="hidden"
+                      ref={fileInputRef}
                     />
-                    <Button type="button" variant="outline" className="mt-2">
-                      <Upload className="h-4 w-4 mr-2" />
-                      Selecionar Arquivo XML
+                    <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} className="mt-2" disabled={isUploading}>
+                      {isUploading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4 mr-2" />
+                      )}
+                      {isUploading ? 'Processando...' : 'Selecionar Arquivo XML'}
                     </Button>
                   </Label>
                   {xmlFile && (
@@ -251,16 +266,18 @@ const PatientForm = () => {
 
                 {xmlParsed && (
                   <Alert>
-                    <CheckCircle2 className="h-4 w-4" />
+                    <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    <AlertTitle>XML Processado!</AlertTitle>
                     <AlertDescription>
-                      XML processado com sucesso! Verifique e complete os dados no formulário abaixo.
+                      Verifique e complete os dados no formulário abaixo antes de salvar.
                     </AlertDescription>
                   </Alert>
                 )}
 
-                {xmlFile && !xmlParsed && (
+                {xmlFile && !xmlParsed && !isUploading && (
                   <Alert>
                     <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Atenção</AlertTitle>
                     <AlertDescription>
                       Alguns dados podem não estar disponíveis no XML. Complete manualmente os campos faltantes.
                     </AlertDescription>
@@ -518,4 +535,3 @@ const PatientForm = () => {
 };
 
 export default PatientForm;
-
