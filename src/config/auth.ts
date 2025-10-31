@@ -35,7 +35,7 @@ export const API_CONFIG = {
   // Guias (XML importados) - endpoints adicionados para exibir guias e seus procedimentos
   guias: '/guide/guides',
   guiaProcedimentos: '/guide/guides/procedures',
-    xmlImporter: '/api/upload',
+    xmlImporter: '/xmlimporter/upload',
     
     // Endpoints específicos do sistema
     validations: '/validations',
