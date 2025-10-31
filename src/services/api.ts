@@ -128,7 +128,7 @@ const createApiClient = (): AxiosInstance => {
   client.interceptors.request.use(
     (config) => {
       // Prioridade: API Key (para desenvolvimento/produção) ou Bearer Token (Azure AD)
-      const apiKey = import.meta.env.VITE_API_KEY;
+      const apiKey = import.meta.env.VITE_API_KEY || "a7f3c8e9d2b1f4a6c5e8d9f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2";
       
       if (apiKey) {
         // Usa API Key se configurada
