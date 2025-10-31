@@ -100,7 +100,7 @@ const PatientList = () => {
   // Usar dados da API ou fallback para mock
   // Garantir que patients seja sempre um array
   // A API retorna: { success: true, data: { data: [...] } }
-  const patients = Array.isArray(patientsResponse?.data?.data) ? patientsResponse.data.data : 
+  const patients = Array.isArray(patientsResponse?.data) ? patientsResponse.data : 
                    Array.isArray(patientsResponse?.data) ? patientsResponse.data :
                    (patientsResponse ? [] : mockPatients);
 

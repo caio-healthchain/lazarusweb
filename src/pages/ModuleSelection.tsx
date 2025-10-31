@@ -32,7 +32,7 @@ const ModuleSelection = () => {
         'Relatórios de auditoria',
         'Validação de procedimentos'
       ],
-      route: '/',
+      route: '/audits',
       available: true
     },
     {

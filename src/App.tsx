@@ -18,6 +18,8 @@ import ModuleSelection from "./pages/ModuleSelection";
 import ManagerialDashboard from "./pages/ManagerialDashboard";
 import ManagerialChat from "./pages/ManagerialChat";
 import NewAudit from "./pages/NewAudit";
+import Audits from "./pages/Audits";
+import GuiaDetails from "./pages/GuiaDetails";
 import NotFound from "./pages/NotFound";
 
 // Components
@@ -105,6 +107,26 @@ const AppContent = () => {
                 <div className="min-h-screen bg-background">
                   <Header />
                   <NewAudit />
+                </div>
+              </ProtectedRoute>
+            } />
+
+            {/* Lista de auditorias / guias importadas */}
+            <Route path="/audits" element={
+              <ProtectedRoute>
+                <div className="min-h-screen bg-background">
+                  <Header />
+                  <Audits />
+                </div>
+              </ProtectedRoute>
+            } />
+
+            {/* Detalhes de uma guia com seus procedimentos */}
+            <Route path="/guia/:id" element={
+              <ProtectedRoute>
+                <div className="min-h-screen bg-background">
+                  <Header />
+                  <GuiaDetails />
                 </div>
               </ProtectedRoute>
             } />

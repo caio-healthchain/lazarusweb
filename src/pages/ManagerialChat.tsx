@@ -199,7 +199,7 @@ const ManagerialChat = () => {
     <div className="h-screen bg-gray-50 flex flex-col">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4 flex-shrink-0">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between ">
           <div className="flex items-center space-x-3">
             <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
               <Brain className="h-6 w-6 text-white" />
@@ -213,28 +213,28 @@ const ManagerialChat = () => {
               </p>
             </div>
           </div>
-          
-          <div className="flex items-center space-x-2">
-            <Badge variant="secondary" className="bg-emerald-100 text-emerald-800">
-              <Sparkles className="mr-1 h-3 w-3" />
-              RAG Ativo
-            </Badge>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={clearHistory}
-              className="h-8"
-            >
-              <RefreshCw className="h-3 w-3 mr-1" />
-              Limpar
-            </Button>
-          </div>
+          {/* Lado Direito (Badges e Ações) */}
+            <div className="flex items-center space-x-3"> {/* Aumentado o espaço para space-x-3 */}
+                <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 text-sm font-medium px-3 py-1"> {/* Ajustado o Badge */}
+                    <Sparkles className="mr-1 h-3 w-3" />
+                    RAG Ativo
+                </Badge>
+                <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={clearHistory}
+                    className="h-8 border-gray-300 hover:bg-gray-50 text-gray-700" // Cor da borda mais clara e hover mais discreto
+                >
+                    <RefreshCw className="h-3 w-3 mr-1" />
+                    Limpar
+                </Button>
+            </div>       
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+  <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Sidebar with suggestions */}
-        <div className="w-80 bg-white border-r border-gray-200 p-4 flex-shrink-0">
+        <div className="w-80 bg-white border-r border-gray-200 p-4 flex-shrink-0 overflow-y-auto">
           <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
             <Lightbulb className="h-4 w-4 mr-2" />
             Consultas Rápidas
@@ -261,6 +261,8 @@ const ManagerialChat = () => {
               </button>
             ))}
           </div>
+
+          
 
           {/* Quick Actions */}
           <div className="mt-6 pt-4 border-t border-gray-200">
@@ -301,10 +303,10 @@ const ManagerialChat = () => {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-0">
           {/* Messages */}
-          <ScrollArea className="flex-1 p-6">
-            <div className="space-y-6 max-w-5xl mx-auto">
+          <ScrollArea className="flex-1 p-6 min-h-0">
+            <div className="space-y-6 max-w-5xl mx-auto pb-24">
               {chatHistory.map(renderMessage)}
 
               {/* Typing Indicator */}

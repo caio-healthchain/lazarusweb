@@ -48,7 +48,7 @@ export const useCBHPMChat = () => {
       setChatHistory(prev => [...prev, userMessage]);
 
       // Enviar para o RAG CBHPM
-      const response = await CBHPMRagService.chatQuery(message, 'medical_consultation');
+      const response = await CBHPMRagService.chatQuery(message);
 
       // Determinar tipo de resposta baseado no conteúdo
       const hasRelevantProcedures = response.relevant_procedures && response.relevant_procedures.length > 0;

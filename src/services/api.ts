@@ -85,6 +85,35 @@ export interface Billing {
   updatedAt: string;
 }
 
+// Tipos para Guias (XML importados) e seus procedimentos
+export interface Guide {
+  id: string;
+  numeroGuiaPrestador?: string;
+  tipoGuia?: string;
+  numeroCarteira?: string;
+  valorTotalGeral?: string;
+  loteGuia?: string;
+  valorTotalProcedimentos?: number;
+  status?: string;
+  diagnostico?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface GuiaProcedure {
+  id: string;
+  sequencialItem?: string;
+  guiaId: string;
+  codigoProcedimento: string;
+  descricaoProcedimento: string;
+  quantidadeExecutada?: number;
+  valorUnitario?: number;
+  valorTotal?: number;
+  status?: 'PENDING' | 'APPROVED' | 'REJECTED' | string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // Configuração do Axios
 const createApiClient = (): AxiosInstance => {
   const client = axios.create({
@@ -95,12 +124,21 @@ const createApiClient = (): AxiosInstance => {
     },
   });
 
-  // Interceptor para adicionar token de autenticação
+  // Interceptor para adicionar token de autenticação ou API Key
   client.interceptors.request.use(
     (config) => {
-      const { accessToken } = useAuthStore.getState();
-      if (accessToken) {
-        config.headers.Authorization = `Bearer ${accessToken}`;
+      // Prioridade: API Key (para desenvolvimento/produção) ou Bearer Token (Azure AD)
+      const apiKey = import.meta.env.VITE_API_KEY;
+      
+      if (apiKey) {
+        // Usa API Key se configurada
+        config.headers['X-API-Key'] = apiKey;
+      } else {
+        // Fallback para Bearer token do Azure AD
+        const { accessToken } = useAuthStore.getState();
+        if (accessToken) {
+          config.headers.Authorization = `Bearer ${accessToken}`;
+        }
       }
 
       // Para uploads de arquivo, o navegador deve definir o Content-Type automaticamente.
@@ -119,14 +157,14 @@ const createApiClient = (): AxiosInstance => {
     (error) => {
       if (error.response?.status === 401) {
         const { user } = useAuthStore.getState();
-        
+
         // Se for usuário demo, não fazer logout automático
         // Apenas logar o erro e deixar o componente tratar com fallback
         if (user?.id === 'test-admin-123') {
           console.warn('⚠️ API retornou 401 - Usando dados de demonstração');
           return Promise.reject(error);
         }
-        
+
         // Para usuários reais, fazer logout
         const { logout } = useAuthStore.getState();
         logout();
@@ -145,16 +183,16 @@ const apiClient = createApiClient();
 export const patientsService = {
   getAll: (params?: { search?: string; page?: number; limit?: number }) =>
     apiClient.get<PaginatedResponse<Patient>>(API_CONFIG.endpoints.patients, { params }),
-  
+
   getById: (id: string) =>
     apiClient.get<ApiResponse<Patient>>(`${API_CONFIG.endpoints.patients}/${id}`),
-  
+
   create: (data: Omit<Patient, 'id' | 'createdAt' | 'updatedAt'>) =>
     apiClient.post<ApiResponse<Patient>>(API_CONFIG.endpoints.patients, data),
-  
+
   update: (id: string, data: Partial<Patient>) =>
     apiClient.put<ApiResponse<Patient>>(`${API_CONFIG.endpoints.patients}/${id}`, data),
-  
+
   delete: (id: string) =>
     apiClient.delete<ApiResponse<void>>(`${API_CONFIG.endpoints.patients}/${id}`),
 };
@@ -162,16 +200,16 @@ export const patientsService = {
 export const proceduresService = {
   getAll: (params?: { patientId?: string; page?: number; limit?: number }) =>
     apiClient.get<PaginatedResponse<Procedure>>(API_CONFIG.endpoints.procedures, { params }),
-  
+
   getById: (id: string) =>
     apiClient.get<ApiResponse<Procedure>>(`${API_CONFIG.endpoints.procedures}/${id}`),
-  
+
   create: (data: Omit<Procedure, 'id' | 'createdAt' | 'updatedAt'>) =>
     apiClient.post<ApiResponse<Procedure>>(API_CONFIG.endpoints.procedures, data),
-  
+
   update: (id: string, data: Partial<Procedure>) =>
     apiClient.put<ApiResponse<Procedure>>(`${API_CONFIG.endpoints.procedures}/${id}`, data),
-  
+
   delete: (id: string) =>
     apiClient.delete<ApiResponse<void>>(`${API_CONFIG.endpoints.procedures}/${id}`),
 };
@@ -179,10 +217,10 @@ export const proceduresService = {
 export const validationsService = {
   getByPatient: (patientId: string) =>
     apiClient.get<ApiResponse<Validation[]>>(`${API_CONFIG.endpoints.validations}/patient/${patientId}`),
-  
+
   approve: (id: string) =>
     apiClient.post<ApiResponse<Validation>>(`${API_CONFIG.endpoints.validations}/${id}/approve`),
-  
+
   reject: (id: string, reason?: string) =>
     apiClient.post<ApiResponse<Validation>>(`${API_CONFIG.endpoints.validations}/${id}/reject`, { reason }),
 };
@@ -190,13 +228,13 @@ export const validationsService = {
 export const materialsService = {
   getAll: (params?: { search?: string; covered?: boolean }) =>
     apiClient.get<PaginatedResponse<Material>>(API_CONFIG.endpoints.materials, { params }),
-  
+
   getById: (id: string) =>
     apiClient.get<ApiResponse<Material>>(`${API_CONFIG.endpoints.materials}/${id}`),
-  
+
   create: (data: Omit<Material, 'id' | 'createdAt' | 'updatedAt'>) =>
     apiClient.post<ApiResponse<Material>>(API_CONFIG.endpoints.materials, data),
-  
+
   update: (id: string, data: Partial<Material>) =>
     apiClient.put<ApiResponse<Material>>(`${API_CONFIG.endpoints.materials}/${id}`, data),
 };
@@ -204,10 +242,10 @@ export const materialsService = {
 export const billingService = {
   getByPatient: (patientId: string) =>
     apiClient.get<ApiResponse<Billing[]>>(`${API_CONFIG.endpoints.billing}/patient/${patientId}`),
-  
+
   create: (data: Omit<Billing, 'id' | 'createdAt' | 'updatedAt'>) =>
     apiClient.post<ApiResponse<Billing>>(API_CONFIG.endpoints.billing, data),
-  
+
   update: (id: string, data: Partial<Billing>) =>
     apiClient.put<ApiResponse<Billing>>(`${API_CONFIG.endpoints.billing}/${id}`, data),
 };
@@ -224,24 +262,77 @@ export interface AuditLog {
 export const auditService = {
   getAll: (params?: { patientId?: string; status?: string }) =>
     apiClient.get<PaginatedResponse<AuditLog>>(API_CONFIG.endpoints.audit, { params }),
-  
+
   createAuditLog: (data: AuditLog) =>
     apiClient.post<ApiResponse<AuditLog>>(API_CONFIG.endpoints.audit, data),
 
   uploadAuditFile: (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    return apiClient.post<ApiResponse<{ id: string }>>(`http://localhost:3001/api/upload`, formData);
+    return apiClient.post<ApiResponse<{ id: string }>>(`${API_CONFIG.endpoints.xmlImporter}`, formData);
   }
 };
 
+// Serviço para buscar guias (XMLs importados) e seus procedimentos
+export const guideService = {
+  getAll: (params?: { page?: number; limit?: number }) =>
+    apiClient.get<PaginatedResponse<Guide>>(API_CONFIG.endpoints.guias, { params }),
+
+  // Listar procedimentos de uma guia usando numeroGuiaPrestador
+  // GET /api/v1/guides/:numeroGuiaPrestador/procedures
+  getProcedures: (numeroGuiaPrestador: string) =>
+    apiClient.get<ApiResponse<GuiaProcedure[]>>(`${API_CONFIG.endpoints.guias}/${numeroGuiaPrestador}/procedures`),
+
+  // Detalhar um procedimento específico
+  // GET /api/v1/guides/procedures/:procedureId
+  getProcedureById: (procedureId: string) =>
+    apiClient.get<ApiResponse<GuiaProcedure>>(`${API_CONFIG.endpoints.guiaProcedimentos}/${procedureId}`),
+
+  updateProcedureStatus: (id: string, status: 'PENDING' | 'APPROVED' | 'REJECTED') =>
+    apiClient.put<ApiResponse<GuiaProcedure>>(`${API_CONFIG.endpoints.guiaProcedimentos}/${id}` , { status }),
+};
+
 // Serviço de Upload
-export const uploadService = {
+/*export const uploadService = {
   uploadTissXml: (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    return apiClient.post<ApiResponse<any>>(`http://localhost:3001/api/upload`, formData);
+    return apiClient.post<ApiResponse<any>>(`http://48.223.187.209/xmlimporter/api/upload`, formData);
     //return apiClient.post<ApiResponse<any>>(`${API_CONFIG.endpoints.patients}/upload-tiss`, formData);
+  }
+};*/
+
+export const uploadService = {
+
+  uploadTissXml: async (file: File): Promise<ApiResponse<any> | null> => {
+
+    console.info(`[uploadService] Iniciando upload do arquivo TISS: ${file.name}`);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      // Aguarda a resposta completa da API
+      const response = await apiClient.post<ApiResponse<any>>(
+        `http://48.223.187.209/xmlimporter/api/upload`,
+        formData
+      );
+
+      // Trata o caso de 204 No Content
+      if (response.status === 204) {
+        console.info(`[uploadService] Upload bem-sucedido (204 No Content), arquivo: ${file.name}`);
+        return null; // Retorna null para indicar sucesso sem conteúdo
+      }
+
+      // Trata outros casos de sucesso (ex: 200 OK, 201 Created)
+      console.info(`[uploadService] Upload bem-sucedido (Status ${response.status}), arquivo: ${file.name}`);
+      return response.data; // Retorna o corpo da resposta
+
+    } catch (error) {
+      // Loga o erro em caso de falha
+      console.error(`[uploadService] Falha no upload do arquivo ${file.name}:`, error);
+      throw error; // Propaga o erro para o chamador (ex: componente da UI)
+    }
   }
 };
 
@@ -272,7 +363,7 @@ export const healthService = {
       })
     );
 
-    return results.map((result, index) => 
+    return results.map((result, index) =>
       result.status === 'fulfilled' ? result.value : { ...services[index], status: 'offline', responseTime: 0 }
     );
   },

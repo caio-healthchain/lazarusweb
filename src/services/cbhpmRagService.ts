@@ -32,18 +32,18 @@ export interface CBHPMHealthResponse {
 }
 
 class CBHPMRagService {
-  private baseURL = 'https://healthchain-apim.azure-api.net/cbhpm';
+  private baseURL: string = import.meta.env.VITE_API_BASE ?? '';
 
   // Busca procedimentos por query
   async searchProcedures(
-    query: string, 
+    query: string,
     options: {
       method?: 'semantic' | 'exact_match' | 'hybrid';
       top_k?: number;
     } = {}
   ): Promise<CBHPMSearchResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/api/v1/procedures/search`, {
+      const response = await fetch(`${this.baseURL}/api/v1/ask`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,16 +67,15 @@ class CBHPMRagService {
   }
 
   // Integração com chat para consultas em linguagem natural
-  async chatQuery(message: string, context: string = 'medical_consultation'): Promise<CBHPMChatResponse> {
+  async chatQuery(message: string): Promise<CBHPMChatResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/api/v1/chat/query`, {
+      const response = await fetch(`${this.baseURL}/api/v1/ask`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: message,
-          context: context
+          message: message
         })
       });
 
@@ -84,7 +83,17 @@ class CBHPMRagService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+
+      // Mapear resposta da API para o formato esperado pelo frontend
+      return {
+        message: data.message,
+        context: data.context || '',  // Add default empty string if context is not provided
+        answer: data.resposta || 'Sem resposta do servidor',
+        relevant_procedures: [],  // API atual não retorna procedimentos
+        total_found: 0,          // API atual não retorna total
+        timestamp: new Date().toISOString()
+      };
     } catch (error) {
       console.error('Erro no chat CBHPM:', error);
       throw error;
@@ -95,7 +104,7 @@ class CBHPMRagService {
   async healthCheck(): Promise<CBHPMHealthResponse> {
     try {
       const response = await fetch(`${this.baseURL}/health`);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -121,7 +130,7 @@ class CBHPMRagService {
   async getStatistics(): Promise<any> {
     try {
       const response = await fetch(`${this.baseURL}/api/v1/procedures/stats`);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

@@ -195,7 +195,7 @@ const Header = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate('/audits')}
                   className="text-xs"
                 >
                   <ClipboardCheck className="mr-2 h-3 w-3" />
