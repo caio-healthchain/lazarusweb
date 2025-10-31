@@ -32,7 +32,7 @@ export interface CBHPMHealthResponse {
 }
 
 class CBHPMRagService {
-  private baseURL: string = import.meta.env.VITE_API_BASE ?? '';
+  private baseURL: string = import.meta.env.VITE_API_BASE ?? 'https://lazarusgateway.azure-api.net';
 
   // Busca procedimentos por query
   async searchProcedures(
