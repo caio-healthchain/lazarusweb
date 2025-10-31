@@ -20,7 +20,7 @@ export const loginRequest: PopupRequest = {
 
 // Configuração da API
 export const API_CONFIG = {
-  baseUrl: import.meta.env.VITE_API_BASE_URL, //|| 'https://lazarusgateway.azure-api.net',
+  baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://lazarusgateway.azure-api.net',
   endpoints: {
     // Microsserviços
     patients: '/patients/patients',
