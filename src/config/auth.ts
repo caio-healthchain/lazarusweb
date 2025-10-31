@@ -33,8 +33,8 @@ export const API_CONFIG = {
     rag: '/rags/rags',
     rules: '/rules/rules',
   // Guias (XML importados) - endpoints adicionados para exibir guias e seus procedimentos
-  guias: 'guide/api/v1/guides',
-  guiaProcedimentos: 'guide/api/v1/guides/procedures',
+  guias: '/guide/guides',
+  guiaProcedimentos: '/guide/guides/procedures',
     xmlImporter: '/api/upload',
     
     // Endpoints específicos do sistema
