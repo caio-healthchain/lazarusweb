@@ -69,7 +69,7 @@ class CBHPMRagService {
   // Integração com chat para consultas em linguagem natural
   async chatQuery(message: string): Promise<CBHPMChatResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/api/v1/ask`, {
+      const response = await fetch(`${this.baseURL}/ask`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
