@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { GuiaProcedure } from '@/services/api';
 import { ProcedureCard } from './ProcedureCard';
+import { generateMockValidations } from '@/services/mockValidationData';
 
 type PendenciaType = 'PORTE' | 'DUT' | 'PACOTE' | 'VALOR' | 'DUPLICADO';
 
@@ -90,9 +91,6 @@ export function PendenciaDetailsModal({
 
   const config = pendenciaConfig[tipo];
   const Icon = config.icon;
-
-  // Importar função de validação
-  const { generateMockValidations } = require('@/services/mockValidationData');
 
   // Filtrar procedimentos que têm a pendência específica
   const procedimentosFiltrados = procedimentos.filter(proc => {
