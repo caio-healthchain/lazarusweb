@@ -2,11 +2,8 @@ import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   BarChart3, 
-  TrendingUp, 
-  TrendingDown,
   Users, 
   DollarSign, 
   Activity,
@@ -14,21 +11,35 @@ import {
   AlertTriangle,
   CheckCircle,
   Clock,
-  ArrowUpRight,
-  ArrowDownRight,
   MessageSquare,
   Brain
 } from 'lucide-react';
 
+// Novos componentes
+import ContractsExpiringCard from '@/components/dashboard/ContractsExpiringCard';
+import TopProfitableOperatorsCard from '@/components/dashboard/TopProfitableOperatorsCard';
+import PaymentDelaysCard from '@/components/dashboard/PaymentDelaysCard';
+import UnprofitableProceduresCard from '@/components/dashboard/UnprofitableProceduresCard';
+import OperationalMetricsSection from '@/components/dashboard/OperationalMetricsSection';
+
+// Dados mock
+import {
+  mockExpiringContracts,
+  mockProfitableOperators,
+  mockPaymentDelays,
+  mockUnprofitableProcedures
+} from '@/data/managerialMockData';
+
 const ManagerialDashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('30d');
 
-  const kpis = [
+  // Métricas operacionais (agora secundárias)
+  const operationalMetrics = [
     {
       title: 'Receita Total',
       value: 'R$ 2.847.320',
       change: '+12.5%',
-      trend: 'up',
+      trend: 'up' as const,
       icon: DollarSign,
       color: 'text-emerald-600'
     },
@@ -36,7 +47,7 @@ const ManagerialDashboard = () => {
       title: 'Pacientes Atendidos',
       value: '1.247',
       change: '+8.2%',
-      trend: 'up',
+      trend: 'up' as const,
       icon: Users,
       color: 'text-blue-600'
     },
@@ -44,7 +55,7 @@ const ManagerialDashboard = () => {
       title: 'Taxa de Ocupação',
       value: '87.3%',
       change: '-2.1%',
-      trend: 'down',
+      trend: 'down' as const,
       icon: Activity,
       color: 'text-orange-600'
     },
@@ -52,7 +63,7 @@ const ManagerialDashboard = () => {
       title: 'Cirurgias Realizadas',
       value: '342',
       change: '+15.7%',
-      trend: 'up',
+      trend: 'up' as const,
       icon: BarChart3,
       color: 'text-purple-600'
     }
@@ -144,161 +155,101 @@ const ManagerialDashboard = () => {
         </div>
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {kpis.map((kpi, index) => {
-          const IconComponent = kpi.icon;
-          return (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-2">{kpi.value}</p>
-                    <div className="flex items-center mt-2">
-                      {kpi.trend === 'up' ? (
-                        <ArrowUpRight className="h-4 w-4 text-emerald-500" />
-                      ) : (
-                        <ArrowDownRight className="h-4 w-4 text-red-500" />
-                      )}
-                      <span className={`text-sm font-medium ml-1 ${
-                        kpi.trend === 'up' ? 'text-emerald-600' : 'text-red-600'
-                      }`}>
-                        {kpi.change}
-                      </span>
-                    </div>
-                  </div>
-                  <div className={`p-3 rounded-full bg-gray-100 ${kpi.color}`}>
-                    <IconComponent className="h-6 w-6" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+      {/* Seção de Insights Críticos */}
+      <div>
+        <div className="mb-4">
+          <h2 className="text-xl font-bold text-gray-900 flex items-center">
+            <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
+            Insights Críticos
+          </h2>
+          <p className="text-sm text-gray-600">Informações que requerem atenção imediata</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Contratos a Vencer */}
+          <ContractsExpiringCard contracts={mockExpiringContracts} />
+
+          {/* Operadoras Mais Lucrativas */}
+          <TopProfitableOperatorsCard operators={mockProfitableOperators} />
+
+          {/* Atrasos de Pagamento */}
+          <PaymentDelaysCard delays={mockPaymentDelays} />
+
+          {/* Procedimentos com Prejuízo */}
+          <UnprofitableProceduresCard procedures={mockUnprofitableProcedures} />
+        </div>
       </div>
 
-      {/* Main Content */}
+      {/* Métricas Operacionais (Colapsável) */}
+      <OperationalMetricsSection metrics={operationalMetrics} />
+
+      {/* Sidebar com Alertas e Ações */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Charts and Analytics */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Análise de Performance</CardTitle>
-              <CardDescription>
-                Métricas principais dos últimos {selectedPeriod === '7d' ? '7 dias' : selectedPeriod === '30d' ? '30 dias' : '90 dias'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="revenue" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="revenue">Receita</TabsTrigger>
-                  <TabsTrigger value="patients">Pacientes</TabsTrigger>
-                  <TabsTrigger value="operations">Operações</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="revenue" className="mt-6">
-                  <div className="h-64 bg-gradient-to-r from-blue-50 to-emerald-50 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <BarChart3 className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                      <p className="text-gray-600">Gráfico de receita será implementado</p>
-                      <p className="text-sm text-gray-500 mt-2">Integração com Recharts em desenvolvimento</p>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="patients" className="mt-6">
-                  <div className="h-64 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <Users className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-                      <p className="text-gray-600">Análise de pacientes será implementada</p>
-                      <p className="text-sm text-gray-500 mt-2">Dashboard interativo em desenvolvimento</p>
-                    </div>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="operations" className="mt-6">
-                  <div className="h-64 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <Activity className="h-12 w-12 text-orange-600 mx-auto mb-4" />
-                      <p className="text-gray-600">Métricas operacionais serão implementadas</p>
-                      <p className="text-sm text-gray-500 mt-2">Análise em tempo real em desenvolvimento</p>
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {/* Alerts */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <AlertTriangle className="mr-2 h-5 w-5 text-orange-500" />
-                Alertas Recentes
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {recentAlerts.map((alert) => (
-                <div key={alert.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                  {getAlertIcon(alert.type)}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{alert.title}</p>
-                    <p className="text-xs text-gray-600 mt-1">{alert.description}</p>
-                    <p className="text-xs text-gray-500 mt-2">{alert.time}</p>
-                  </div>
+        {/* Alertas Recentes */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <AlertTriangle className="mr-2 h-5 w-5 text-orange-500" />
+              Alertas Recentes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {recentAlerts.map((alert) => (
+              <div key={alert.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                {getAlertIcon(alert.type)}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900">{alert.title}</p>
+                  <p className="text-xs text-gray-600 mt-1">{alert.description}</p>
+                  <p className="text-xs text-gray-500 mt-2">{alert.time}</p>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
 
-          {/* Upcoming Events */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calendar className="mr-2 h-5 w-5 text-blue-500" />
-                Próximos Eventos
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {upcomingEvents.map((event) => (
-                <div key={event.id} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
-                  <div className="flex-shrink-0">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{event.title}</p>
-                    <p className="text-xs text-gray-600">{event.date} às {event.time}</p>
-                  </div>
+        {/* Próximos Eventos */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Calendar className="mr-2 h-5 w-5 text-blue-500" />
+              Próximos Eventos
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {upcomingEvents.map((event) => (
+              <div key={event.id} className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg">
+                <div className="flex-shrink-0">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900">{event.title}</p>
+                  <p className="text-xs text-gray-600">{event.date} às {event.time}</p>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
 
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Ações Rápidas</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start">
-                <Brain className="mr-2 h-4 w-4" />
-                Consultar IA
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <BarChart3 className="mr-2 h-4 w-4" />
-                Gerar Relatório
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Users className="mr-2 h-4 w-4" />
-                Ver Equipes
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Ações Rápidas */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Ações Rápidas</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button variant="outline" className="w-full justify-start">
+              <Brain className="mr-2 h-4 w-4" />
+              Consultar IA
+            </Button>
+            <Button variant="outline" className="w-full justify-start">
+              <BarChart3 className="mr-2 h-4 w-4" />
+              Gerar Relatório
+            </Button>
+            <Button variant="outline" className="w-full justify-start">
+              <Users className="mr-2 h-4 w-4" />
+              Ver Equipes
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
