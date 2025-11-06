@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ import {
 } from '@/data/managerialMockData';
 
 const ManagerialDashboard = () => {
+  const navigate = useNavigate();
   const [selectedPeriod, setSelectedPeriod] = useState('30d');
 
   // Métricas operacionais (agora secundárias)
@@ -148,7 +150,10 @@ const ManagerialDashboard = () => {
             <option value="90d">Últimos 90 dias</option>
           </select>
           
-          <Button className="bg-blue-600 hover:bg-blue-700">
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => navigate('/gerencial/chat')}
+          >
             <MessageSquare className="mr-2 h-4 w-4" />
             Chat com IA
           </Button>
