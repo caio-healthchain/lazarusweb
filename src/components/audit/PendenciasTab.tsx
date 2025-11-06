@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -10,14 +11,39 @@ import {
   Copy
 } from 'lucide-react';
 import { PendenciasStats } from '@/services/mockValidationData';
+import { PendenciaDetailsModal } from './PendenciaDetailsModal';
+import { GuiaProcedure } from '@/services/api';
 
 interface PendenciasTabProps {
   stats: PendenciasStats;
+  procedimentos: GuiaProcedure[];
+  onApprove: (id: string) => void;
+  onReject: (id: string) => void;
+  onReset: (id: string) => void;
+  isUpdating: boolean;
 }
 
-export function PendenciasTab({ stats }: PendenciasTabProps) {
-  const pendencias = [
+type PendenciaType = 'PORTE' | 'DUT' | 'PACOTE' | 'VALOR' | 'DUPLICADO';
+
+export function PendenciasTab({ stats, procedimentos, onApprove, onReject, onReset, isUpdating }: PendenciasTabProps) {
+  const [selectedPendencia, setSelectedPendencia] = useState<PendenciaType | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const handleCardClick = (tipo: PendenciaType) => {
+    setSelectedPendencia(tipo);
+    setModalOpen(true);
+  };
+  const pendencias: Array<{
+    tipo: PendenciaType;
+    icon: any;
+    label: string;
+    count: number;
+    color: string;
+    bgColor: string;
+    description: string;
+  }> = [
     {
+      tipo: 'PORTE',
       icon: Activity,
       label: 'Portes Divergentes',
       count: stats.portesDivergentes,
@@ -26,6 +52,7 @@ export function PendenciasTab({ stats }: PendenciasTabProps) {
       description: 'Procedimentos com porte cirúrgico diferente do sugerido'
     },
     {
+      tipo: 'DUT',
       icon: FileText,
       label: 'DUT Não Conformes',
       count: stats.dutNaoConformes,
@@ -34,6 +61,7 @@ export function PendenciasTab({ stats }: PendenciasTabProps) {
       description: 'Procedimentos que não atendem critérios da DUT'
     },
     {
+      tipo: 'PACOTE',
       icon: Package,
       label: 'Fora do Pacote',
       count: stats.foraDoPacote,
@@ -42,6 +70,7 @@ export function PendenciasTab({ stats }: PendenciasTabProps) {
       description: 'Procedimentos não incluídos no pacote contratual'
     },
     {
+      tipo: 'VALOR',
       icon: DollarSign,
       label: 'Valores Divergentes',
       count: stats.valoresDivergentes,
@@ -50,6 +79,7 @@ export function PendenciasTab({ stats }: PendenciasTabProps) {
       description: 'Procedimentos com valor diferente do contratado'
     },
     {
+      tipo: 'DUPLICADO',
       icon: Copy,
       label: 'Duplicados',
       count: stats.duplicados,
@@ -85,7 +115,11 @@ export function PendenciasTab({ stats }: PendenciasTabProps) {
         {pendencias.map((pendencia, index) => {
           const Icon = pendencia.icon;
           return (
-            <Card key={index} className="hover:shadow-md transition-shadow">
+              <Card 
+                key={index} 
+                className="hover:shadow-lg transition-all cursor-pointer transform hover:scale-105"
+                onClick={() => handleCardClick(pendencia.tipo)}
+              >
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-medium text-gray-700">
@@ -140,6 +174,18 @@ export function PendenciasTab({ stats }: PendenciasTabProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de Detalhes */}
+      <PendenciaDetailsModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        tipo={selectedPendencia}
+        procedimentos={procedimentos}
+        onApprove={onApprove}
+        onReject={onReject}
+        onReset={onReset}
+        isUpdating={isUpdating}
+      />
     </div>
   );
 }

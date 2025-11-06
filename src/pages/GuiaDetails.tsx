@@ -274,7 +274,14 @@ const GuiaDetailsNew = () => {
 
           {/* Aba de Pendências */}
           <TabsContent value="pendencias" className="mt-4">
-            <PendenciasTab stats={pendenciasStats} />
+            <PendenciasTab 
+              stats={pendenciasStats} 
+              procedimentos={procedimentos}
+              onApprove={handleApprove}
+              onReject={handleReject}
+              onReset={handleReset}
+              isUpdating={updateStatusMutation.isPending}
+            />
           </TabsContent>
 
           {/* Outras abas com procedimentos */}
