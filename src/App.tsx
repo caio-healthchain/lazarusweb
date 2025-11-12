@@ -20,6 +20,8 @@ import ManagerialChat from "./pages/ManagerialChat";
 import NewAudit from "./pages/NewAudit";
 import Audits from "./pages/Audits";
 import GuiaDetails from "./pages/GuiaDetails";
+import { Contracts } from "./pages/Contracts";
+import { ContractDetails } from "./pages/ContractDetails";
 import NotFound from "./pages/NotFound";
 
 // Components
@@ -127,6 +129,26 @@ const AppContent = () => {
                 <div className="min-h-screen bg-background">
                   <Header />
                   <GuiaDetails />
+                </div>
+              </ProtectedRoute>
+            } />
+
+            {/* Contratos */}
+            <Route path="/contracts" element={
+              <ProtectedRoute>
+                <div className="min-h-screen bg-background">
+                  <Header />
+                  <Contracts />
+                </div>
+              </ProtectedRoute>
+            } />
+
+            {/* Detalhes do Contrato */}
+            <Route path="/contracts/:id" element={
+              <ProtectedRoute>
+                <div className="min-h-screen bg-background">
+                  <Header />
+                  <ContractDetails />
                 </div>
               </ProtectedRoute>
             } />

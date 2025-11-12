@@ -37,6 +37,9 @@ export const API_CONFIG = {
   guiaProcedimentos: '/guide/guides/procedures',
     xmlImporter: '/xmlimporter/upload',
     
+    // Contratos - endpoints para validação contratual
+    contracts: '/contracts/contracts',
+    
     // Endpoints específicos do sistema
     validations: '/validations',
     pendencies: '/pendencies',
