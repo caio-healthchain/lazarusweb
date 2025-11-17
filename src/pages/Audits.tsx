@@ -54,6 +54,15 @@ const Audits = () => {
     };
   }, [guias]);
 
+  // Calcular TMI Médio
+  const tmiMedio = useMemo(() => {
+    const tmis = guias
+      .map(g => calcularTMI(g.dataInicioFaturamento, g.dataFinalFaturamento))
+      .filter((tmi): tmi is number => tmi !== null);
+    if (tmis.length === 0) return null;
+    return Math.round(tmis.reduce((acc, tmi) => acc + tmi, 0) / tmis.length);
+  }, [guias]);
+
   const formatCurrency = (value: number | string | undefined) => {
     if (!value) return 'R$ 0,00';
     const num = typeof value === 'string' ? parseFloat(value) : value;
@@ -131,13 +140,7 @@ const Audits = () => {
                 <div>
                   <p className="text-sm font-medium text-gray-600 mb-1">TMI Médio</p>
                   <p className="text-3xl font-bold text-gray-900">
-                    {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : formatarTMI(useMemo(() => {
-                      const tmis = guias
-                        .map(g => calcularTMI(g.dataInicioFaturamento, g.dataFinalFaturamento))
-                        .filter((tmi): tmi is number => tmi !== null);
-                      if (tmis.length === 0) return null;
-                      return Math.round(tmis.reduce((acc, tmi) => acc + tmi, 0) / tmis.length);
-                    }, [guias]))}
+                    {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : formatarTMI(tmiMedio)}
                   </p>
                 </div>
                 <div className="p-3 bg-orange-100 rounded-full">
