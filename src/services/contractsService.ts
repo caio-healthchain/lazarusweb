@@ -89,8 +89,16 @@ export const contractsService = {
    * Lista todos os contratos
    */
   getAll: async (): Promise<Contract[]> => {
-    const response = await apiClient.get<Contract[]>(API_CONFIG.endpoints.contracts);
-    return response.data;
+    const response = await apiClient.get(API_CONFIG.endpoints.contracts);
+    // A API pode retornar um array direto ou um objeto paginado { data: [], total: 0 }
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    if (response.data && Array.isArray(response.data.data)) {
+      return response.data.data;
+    }
+    console.error('Resposta inesperada da API:', response.data);
+    return [];
   },
 
   /**
@@ -105,8 +113,16 @@ export const contractsService = {
    * Lista todos os itens de um contrato
    */
   getItems: async (id: string): Promise<ContractItem[]> => {
-    const response = await apiClient.get<ContractItem[]>(`${API_CONFIG.endpoints.contracts}/${id}/items`);
-    return response.data;
+    const response = await apiClient.get(`${API_CONFIG.endpoints.contracts}/${id}/items`);
+    // A API pode retornar um array direto ou um objeto paginado
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    if (response.data && Array.isArray(response.data.data)) {
+      return response.data.data;
+    }
+    console.error('Resposta inesperada da API (items):', response.data);
+    return [];
   },
 
   /**
