@@ -302,10 +302,12 @@ export const guideService = {
     const data = status === 'PENDING' 
       ? { status }
       : { 
-          guiaId: guiaId || parseInt(procedimentoId.split('-')[0] || '0'),
+          guiaId: guiaId,
           auditorId: 'demo-auditor', // TODO: pegar do contexto de autenticação
           observacoes: status === 'APPROVED' ? 'Aprovado pelo auditor' : 'Rejeitado pelo auditor'
         };
+    
+    console.log('updateProcedureStatus:', { endpoint, method, data, procedimentoId, status, guiaId });
     
     return method === 'put'
       ? apiClient.put<ApiResponse<any>>(endpoint, data)

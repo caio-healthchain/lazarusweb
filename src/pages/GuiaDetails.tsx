@@ -68,8 +68,8 @@ const GuiaDetailsNew = () => {
   }, [procedimentos]);
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: 'PENDING'|'APPROVED'|'REJECTED' }) =>
-      guideService.updateProcedureStatus(id, status),
+    mutationFn: ({ id, status, guiaId }: { id: string; status: 'PENDING'|'APPROVED'|'REJECTED'; guiaId?: number }) =>
+      guideService.updateProcedureStatus(id, status, guiaId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['guia', numeroGuiaPrestador, 'procedures'] });
       toast.success('Status do procedimento atualizado.');
@@ -79,9 +79,21 @@ const GuiaDetailsNew = () => {
     }
   });
 
-  const handleApprove = (procId: string) => updateStatusMutation.mutate({ id: procId, status: 'APPROVED' });
-  const handleReject = (procId: string) => updateStatusMutation.mutate({ id: procId, status: 'REJECTED' });
-  const handleReset = (procId: string) => updateStatusMutation.mutate({ id: procId, status: 'PENDING' });
+  const handleApprove = (procId: string) => {
+    const proc = procedimentos.find(p => p.id === procId);
+    const guiaId = proc?.guiaId ? parseInt(proc.guiaId) : undefined;
+    updateStatusMutation.mutate({ id: procId, status: 'APPROVED', guiaId });
+  };
+  const handleReject = (procId: string) => {
+    const proc = procedimentos.find(p => p.id === procId);
+    const guiaId = proc?.guiaId ? parseInt(proc.guiaId) : undefined;
+    updateStatusMutation.mutate({ id: procId, status: 'REJECTED', guiaId });
+  };
+  const handleReset = (procId: string) => {
+    const proc = procedimentos.find(p => p.id === procId);
+    const guiaId = proc?.guiaId ? parseInt(proc.guiaId) : undefined;
+    updateStatusMutation.mutate({ id: procId, status: 'PENDING', guiaId });
+  };
 
   // Aprovação massiva
   const handleSelectAll = (checked: boolean) => {
