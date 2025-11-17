@@ -90,15 +90,31 @@ export const contractsService = {
    */
   getAll: async (): Promise<Contract[]> => {
     const response = await apiClient.get(API_CONFIG.endpoints.contracts);
-    // A API pode retornar um array direto ou um objeto paginado { data: [], total: 0 }
+    
+    let contracts: any[] = [];
+    
+    // A API pode retornar um array direto ou um objeto paginado
     if (Array.isArray(response.data)) {
-      return response.data;
+      contracts = response.data;
+    } else if (response.data && Array.isArray(response.data.data)) {
+      contracts = response.data.data;
+    } else {
+      console.error('Resposta inesperada da API:', response.data);
+      return [];
     }
-    if (response.data && Array.isArray(response.data.data)) {
-      return response.data.data;
-    }
-    console.error('Resposta inesperada da API:', response.data);
-    return [];
+    
+    // Mapear resposta da API para interface Contract do frontend
+    return contracts.map((c: any) => ({
+      id: c.id,
+      operadoraId: c.operadoraId,
+      numeroContrato: c.numero || c.numeroContrato, // API retorna 'numero'
+      dataInicio: c.dataInicio,
+      dataFim: c.dataFim,
+      tipoContrato: c.operadora?.nomeFantasia || c.tipoContrato || 'N/A', // Usar nome da operadora
+      status: c.status,
+      createdAt: c.createdAt,
+      updatedAt: c.updatedAt,
+    }));
   },
 
   /**
