@@ -32,10 +32,10 @@ export function Contracts() {
     }
   }
 
-  const filteredContracts = contracts.filter(
+  const filteredContracts = (contracts || []).filter(
     (c) =>
-      c.numeroContrato.toLowerCase().includes(search.toLowerCase()) ||
-      c.tipoContrato.toLowerCase().includes(search.toLowerCase())
+      c?.numeroContrato?.toLowerCase().includes(search.toLowerCase()) ||
+      c?.tipoContrato?.toLowerCase().includes(search.toLowerCase())
   );
 
   const activeContracts = filteredContracts.filter((c) => contractsUtils.isContractActive(c));
