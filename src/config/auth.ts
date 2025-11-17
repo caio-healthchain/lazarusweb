@@ -40,6 +40,10 @@ export const API_CONFIG = {
     // Contratos - endpoints para validação contratual
     contracts: '/contracts/contracts',
     
+    // Auditoria de Procedimentos - endpoints para validação e aprovação
+    procedureValidation: '/audits/procedures/validate',
+    procedureApproval: '/audits/procedures',
+    
     // Endpoints específicos do sistema
     validations: '/validations',
     pendencies: '/pendencies',

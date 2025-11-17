@@ -290,8 +290,50 @@ export const guideService = {
   getProcedureById: (procedureId: string) =>
     apiClient.get<ApiResponse<GuiaProcedure>>(`${API_CONFIG.endpoints.guiaProcedimentos}/${procedureId}`),
 
-  updateProcedureStatus: (id: string, status: 'PENDING' | 'APPROVED' | 'REJECTED') =>
-    apiClient.put<ApiResponse<GuiaProcedure>>(`${API_CONFIG.endpoints.guiaProcedimentos}/${id}` , { status }),
+  updateProcedureStatus: async (procedimentoId: string, status: 'PENDING' | 'APPROVED' | 'REJECTED', guiaId?: number) => {
+    // Usar o novo endpoint do ms-audit para aprovar/rejeitar
+    const endpoint = status === 'APPROVED' 
+      ? `${API_CONFIG.endpoints.procedureApproval}/${procedimentoId}/approve`
+      : status === 'REJECTED'
+      ? `${API_CONFIG.endpoints.procedureApproval}/${procedimentoId}/reject`
+      : `${API_CONFIG.endpoints.guiaProcedimentos}/${procedimentoId}`;
+    
+    const method = status === 'PENDING' ? 'put' : 'post';
+    const data = status === 'PENDING' 
+      ? { status }
+      : { 
+          guiaId: guiaId || parseInt(procedimentoId.split('-')[0] || '0'),
+          auditorId: 'demo-auditor', // TODO: pegar do contexto de autenticação
+          observacoes: status === 'APPROVED' ? 'Aprovado pelo auditor' : 'Rejeitado pelo auditor'
+        };
+    
+    return method === 'put'
+      ? apiClient.put<ApiResponse<any>>(endpoint, data)
+      : apiClient.post<ApiResponse<any>>(endpoint, data);
+  },
+  
+  // Validar procedimento
+  validateProcedimento: (procedimentoId: number, guiaId: number, operadoraId: string) =>
+    apiClient.post<ApiResponse<any>>(`${API_CONFIG.endpoints.procedureValidation}/${procedimentoId}`, {
+      guiaId,
+      operadoraId
+    }),
+  
+  // Validar guia inteira
+  validateGuia: (guiaId: number, operadoraId: string) =>
+    apiClient.post<ApiResponse<any>>(`${API_CONFIG.endpoints.procedureValidation}-guia/${guiaId}`, {
+      operadoraId
+    }),
+  
+  // Aprovar guia inteira
+  approveGuiaInteira: (guiaId: number, auditorId: string) =>
+    apiClient.post<ApiResponse<any>>(`${API_CONFIG.endpoints.procedureApproval}/guia/${guiaId}/approve-all`, {
+      auditorId
+    }),
+  
+  // Obter status da guia
+  getGuiaStatus: (guiaId: number) =>
+    apiClient.get<ApiResponse<any>>(`${API_CONFIG.endpoints.procedureApproval}/guia/${guiaId}/status`),
 };
 
 // Serviço de Upload
