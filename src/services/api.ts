@@ -96,6 +96,8 @@ export interface Guide {
   valorTotalProcedimentos?: number;
   status?: string;
   diagnostico?: string;
+  dataInicioFaturamento?: string;
+  dataFinalFaturamento?: string;
   createdAt?: string;
   updatedAt?: string;
 }

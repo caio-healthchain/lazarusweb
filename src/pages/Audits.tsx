@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { guideService, Guide } from '@/services/api';
 import { getAuditSessionName } from '@/lib/utils';
+import { calcularTMI, formatarTMI, classificarTMI } from '@/lib/tmiUtils';
 import { 
   Activity, 
   FileText, 
@@ -19,7 +20,8 @@ import {
   DollarSign,
   ClipboardList,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Clock
 } from 'lucide-react';
 
 const Audits = () => {
@@ -90,7 +92,7 @@ const Audits = () => {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -118,6 +120,28 @@ const Audits = () => {
                 </div>
                 <div className="p-3 bg-green-100 rounded-full">
                   <DollarSign className="h-8 w-8 text-green-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-orange-500 shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 mb-1">TMI Médio</p>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {isLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : formatarTMI(useMemo(() => {
+                      const tmis = guias
+                        .map(g => calcularTMI(g.dataInicioFaturamento, g.dataFinalFaturamento))
+                        .filter((tmi): tmi is number => tmi !== null);
+                      if (tmis.length === 0) return null;
+                      return Math.round(tmis.reduce((acc, tmi) => acc + tmi, 0) / tmis.length);
+                    }, [guias]))}
+                  </p>
+                </div>
+                <div className="p-3 bg-orange-100 rounded-full">
+                  <Clock className="h-8 w-8 text-orange-600" />
                 </div>
               </div>
             </CardContent>
@@ -205,8 +229,8 @@ const Audits = () => {
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="all">Todas <Badge variant="secondary" className="ml-2">{sessionCounts.all}</Badge></TabsTrigger>
-              <TabsTrigger value="inloco">InLoco <Badge variant="secondary" className="ml-2">{sessionCounts.inloco}</Badge></TabsTrigger>
-              <TabsTrigger value="retrospectiva">Retrospectiva <Badge variant="secondary" className="ml-2">{sessionCounts.retrospectiva}</Badge></TabsTrigger>
+              <TabsTrigger value="inloco">Contas Parciais <Badge variant="secondary" className="ml-2">{sessionCounts.inloco}</Badge></TabsTrigger>
+              <TabsTrigger value="retrospectiva">Contas Fechadas <Badge variant="secondary" className="ml-2">{sessionCounts.retrospectiva}</Badge></TabsTrigger>
             </TabsList>
 
             {['all','inloco','retrospectiva'].map((view) => {
@@ -274,7 +298,7 @@ const Audits = () => {
                                   <ChevronRight className="h-6 w-6 text-gray-400" />
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
                                   <div className="flex items-center gap-2 text-sm">
                                     <User className="h-4 w-4 text-gray-500" />
                                     <div>
@@ -303,11 +327,11 @@ const Audits = () => {
                                   </div>
 
                                   <div className="flex items-center gap-2 text-sm">
-                                    <Calendar className="h-4 w-4 text-gray-500" />
+                                    <Clock className="h-4 w-4 text-gray-500" />
                                     <div>
-                                      <p className="text-gray-500">Data de Importação</p>
+                                      <p className="text-gray-500">TMI</p>
                                       <p className="font-medium text-gray-900">
-                                        {guia.createdAt ? new Date(guia.createdAt).toLocaleDateString('pt-BR') : 'N/A'}
+                                        {formatarTMI(calcularTMI(guia.dataInicioFaturamento, guia.dataFinalFaturamento))}
                                       </p>
                                     </div>
                                   </div>

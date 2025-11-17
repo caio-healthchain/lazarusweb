@@ -19,7 +19,9 @@ import {
   Brain,
   Sparkles,
   ChevronDown,
-  Grid3X3
+  Grid3X3,
+  FileText,
+  Clock
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -192,15 +194,35 @@ const Header = () => {
                   </Button>
                 </>
               ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate('/audits')}
-                  className="text-xs"
-                >
-                  <ClipboardCheck className="mr-2 h-3 w-3" />
-                  Auditoria
-                </Button>
+                <>
+                  <Button
+                    variant={location.pathname === '/audits' ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => navigate('/audits')}
+                    className="text-xs"
+                  >
+                    <ClipboardCheck className="mr-2 h-3 w-3" />
+                    Auditoria
+                  </Button>
+                  <Button
+                    variant={location.pathname === '/contracts' ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => navigate('/contracts')}
+                    className="text-xs"
+                  >
+                    <FileText className="mr-2 h-3 w-3" />
+                    Contratos
+                  </Button>
+                  <Button
+                    variant={location.pathname === '/tmi-report' ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => navigate('/tmi-report')}
+                    className="text-xs"
+                  >
+                    <Clock className="mr-2 h-3 w-3" />
+                    TMI
+                  </Button>
+                </>
               )}
               
               <Button

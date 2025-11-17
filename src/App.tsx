@@ -22,6 +22,7 @@ import Audits from "./pages/Audits";
 import GuiaDetails from "./pages/GuiaDetails";
 import { Contracts } from "./pages/Contracts";
 import { ContractDetails } from "./pages/ContractDetails";
+import TMIReport from "./pages/TMIReport";
 import NotFound from "./pages/NotFound";
 
 // Components
@@ -144,6 +145,15 @@ const AppContent = () => {
             } />
 
             {/* Detalhes do Contrato */}
+            <Route path="/tmi-report" element={
+              <ProtectedRoute>
+                <>
+                  <Header />
+                  <TMIReport />
+                </>
+              </ProtectedRoute>
+            } />
+
             <Route path="/contracts/:id" element={
               <ProtectedRoute>
                 <div className="min-h-screen bg-background">
