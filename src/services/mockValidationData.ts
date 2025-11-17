@@ -104,6 +104,8 @@ export const mockPorteDatabase: Record<string, string> = {
   '30208017': '3A',
   '30715598': '4A',
   '30717027': '4B',
+  '30906113': '3B', // ANGIOPLASTIA TRANSLUMINAL TRANSOPERATORIA - POR ARTERIA
+  '30913101': '2C', // IMPLANTE CIRURGICO DE CATETER DE LONGA PERMANENCIA PARA NPP
   // Procedimentos não cirúrgicos não têm porte
 };
 
@@ -132,13 +134,21 @@ export function generateMockValidations(codigoTUSS: string, valorCobrado: number
       validations.push({
         tipo: 'PORTE_CIRURGICO',
         status: 'CONFORME',
-        mensagem: `Porte ${porte} identificado`
+        mensagem: `Porte ${porte} identificado`,
+        porteEsperado: porte,
+        porteEncontrado: porte
       });
     } else {
+      // Simular um porte esperado baseado no código
+      const portesDisponiveis = ['1', '2A', '2B', '2C', '3A', '3B', '3C', '4A', '4B', '4C'];
+      const porteEsperadoSimulado = portesDisponiveis[hash % portesDisponiveis.length];
+      
       validations.push({
         tipo: 'PORTE_CIRURGICO',
         status: 'ALERTA',
-        mensagem: 'Porte cirúrgico não encontrado na tabela'
+        mensagem: `Porte cirúrgico não encontrado. Porte esperado: ${porteEsperadoSimulado}`,
+        porteEsperado: porteEsperadoSimulado,
+        porteEncontrado: 'Não encontrado'
       });
     }
   }

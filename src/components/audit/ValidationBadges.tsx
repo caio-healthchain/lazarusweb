@@ -17,6 +17,8 @@ export interface ValidationResult {
   valorEsperado?: number;
   valorEncontrado?: number;
   diferenca?: number;
+  porteEsperado?: string;
+  porteEncontrado?: string;
 }
 
 interface ValidationBadgesProps {
@@ -112,11 +114,20 @@ export function ValidationBadges({ validations, onDUTClick }: ValidationBadgesPr
     let content = validation.mensagem || '';
     
     if (validation.tipo === 'VALOR_CONTRATUAL' && validation.valorEsperado && validation.valorEncontrado) {
-      content = `
-        Valor Esperado: ${formatCurrency(validation.valorEsperado)}
-        Valor Cobrado: ${formatCurrency(validation.valorEncontrado)}
-        Diferença: ${formatCurrency(Math.abs(validation.diferenca || 0))}
-      `;
+      content = `Valor Esperado (Contratado): ${formatCurrency(validation.valorEsperado)}
+Valor Recebido (Cobrado): ${formatCurrency(validation.valorEncontrado)}
+Diferença: ${formatCurrency(Math.abs(validation.diferenca || 0))}`;
+    }
+    
+    if (validation.tipo === 'PORTE_CIRURGICO' && validation.porteEsperado) {
+      if (validation.status === 'ALERTA' || validation.status === 'NAO_CONFORME') {
+        content = `Porte Esperado: ${validation.porteEsperado}
+Porte Encontrado: ${validation.porteEncontrado || 'Não encontrado'}`;
+      }
+    }
+    
+    if (validation.tipo === 'PACOTE_CONTRATUAL' && (validation.status === 'NAO_CONFORME' || validation.status === 'ALERTA')) {
+      content = 'Procedimento NÃO incluído no pacote contratual\nPossível glosa - Requer atenção';
     }
     
     return content;
@@ -146,7 +157,10 @@ export function ValidationBadges({ validations, onDUTClick }: ValidationBadgesPr
             </Badge>
           );
 
-          if (validation.mensagem || (validation.tipo === 'VALOR_CONTRATUAL' && validation.valorEsperado)) {
+          if (validation.mensagem || 
+              (validation.tipo === 'VALOR_CONTRATUAL' && validation.valorEsperado) ||
+              (validation.tipo === 'PORTE_CIRURGICO' && validation.porteEsperado) ||
+              (validation.tipo === 'PACOTE_CONTRATUAL' && (validation.status === 'NAO_CONFORME' || validation.status === 'ALERTA'))) {
             return (
               <Tooltip key={index}>
                 <TooltipTrigger asChild>
