@@ -314,7 +314,7 @@ export const uploadService = {
     try {
       // Aguarda a resposta completa da API
       const response = await apiClient.post<ApiResponse<any>>(
-        `http://48.223.187.209/xmlimporter/api/upload`,
+        `https://lazarusapi.azure-api.net/xmlimporter/upload`,
         formData
       );
 
