@@ -87,7 +87,7 @@ const NewAudit = () => {
         <div className="flex items-center mb-6">
           <Button
             variant="ghost"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/audits')}
             className="mr-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
