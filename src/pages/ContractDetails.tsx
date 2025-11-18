@@ -51,7 +51,7 @@ export function ContractDetails() {
   const filteredItems = items.filter(
     (item) =>
       item.codigoTUSS.toLowerCase().includes(search.toLowerCase()) ||
-      item.descricao.toLowerCase().includes(search.toLowerCase())
+      (item.descricao && item.descricao.toLowerCase().includes(search.toLowerCase()))
   );
 
   if (loading) {
@@ -185,8 +185,8 @@ export function ContractDetails() {
                     <TableRow key={item.id} className="hover:bg-gray-50">
                       <TableCell className="font-mono font-medium">{item.codigoTUSS}</TableCell>
                       <TableCell className="max-w-md">
-                        <div className="truncate" title={item.descricao}>
-                          {item.descricao}
+                        <div className="truncate" title={item.descricao || 'Sem descrição'}>
+                          {item.descricao || <span className="text-gray-400">Sem descrição</span>}
                         </div>
                       </TableCell>
                       <TableCell>

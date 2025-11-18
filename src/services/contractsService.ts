@@ -18,7 +18,7 @@ export interface ContractItem {
   id: string;
   contratoId: string;
   codigoTUSS: string;
-  descricao: string;
+  descricao: string | null;
   valorContratado: number;
   valorMaximo: number | null;
   quantidadeMaxima: number | null;
