@@ -35,37 +35,49 @@ const NewAudit = () => {
     try {
       const response = await auditService.uploadAuditFile(uploadFile);
 
-      // Trata o caso de sucesso sem conteúdo (204 No Content)
-      if (response.status === 204 || !response.data?.data?.id) {
-        setUploadSuccess(true);
-        toast.success('Arquivo enviado e processado com sucesso!');
+      // Nova estrutura de resposta assíncrona
+      // { success: true, guias: ['23830121', ...], totalGuias: 1, status: 'PROCESSANDO' }
+      const guias = response.data?.guias || [];
+      const totalGuias = response.data?.totalGuias || 0;
+
+      if (totalGuias === 0) {
+        toast.warning('Nenhuma guia encontrada no arquivo.');
         setIsUploading(false);
         return;
       }
-      
-      // Acessa o ID da auditoria da resposta da API.
-      // A estrutura esperada é { success: true, data: { id: '...' } }
-      const auditId = response.data?.data?.id;
-
-      if (!auditId) {
-        throw new Error("A resposta da API não continha um ID de auditoria válido.");
-      }
 
       setUploadSuccess(true);
-      toast.success('Arquivo processado com sucesso! Redirecionando para a auditoria...');
+      
+      if (totalGuias === 1) {
+        toast.success(`Guia #${guias[0]} sendo processada! Redirecionando...`);
+        
+        // Redireciona para a lista de auditorias
+        setTimeout(() => {
+          navigate('/audits');
+          setIsUploading(false);
+        }, 1500);
+      } else {
+        toast.success(`${totalGuias} guias sendo processadas! Redirecionando...`);
+        
+        // Redireciona para a lista de auditorias
+        setTimeout(() => {
+          navigate('/audits');
+          setIsUploading(false);
+        }, 1500);
+      }
 
-      // Redireciona para a página de detalhes da auditoria após um breve delay
-      setTimeout(() => {
-        navigate(`/audit/${auditId}`);
-        // Desativa o loading apenas após o redirecionamento
-        setIsUploading(false); 
-      }, 2000);
-
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao enviar arquivo de auditoria:', error);
-      toast.error('Erro ao processar o arquivo. Verifique o console para mais detalhes.');
-      setIsUploading(false); // Para o loading em caso de erro
-      setFile(null); // Limpa o arquivo em caso de erro
+      
+      // Verificar se é erro de tamanho de arquivo
+      if (error.response?.status === 413 || error.message?.includes('too large')) {
+        toast.error('Arquivo muito grande! O limite é de 3MB.');
+      } else {
+        toast.error('Erro ao processar o arquivo. Verifique o console para mais detalhes.');
+      }
+      
+      setIsUploading(false);
+      setFile(null);
     }
   };
 
@@ -127,7 +139,7 @@ const NewAudit = () => {
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
                 <AlertTitle>Sucesso!</AlertTitle>
                 <AlertDescription>
-                  O arquivo foi processado e a auditoria foi iniciada. Você será redirecionado em breve.
+                  {file && `Guia(s) sendo processada(s) em segundo plano. Você será redirecionado para a lista de auditorias.`}
                 </AlertDescription>
               </Alert>
             )}
