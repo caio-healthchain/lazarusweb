@@ -20,8 +20,8 @@ export function generateTISSXML(options: ExportXMLOptions): string {
     throw new Error('Nenhum procedimento aprovado para exportar');
   }
   
-  // Calcular valor total
-  const valorTotal = aprovados.reduce((acc, p) => acc + (Number(p.valorTotal) || 0), 0);
+  // Calcular valor total (usar valorAprovado se existir, senão valorTotal)
+  const valorTotal = aprovados.reduce((acc, p) => acc + (Number(p.valorAprovado) || Number(p.valorTotal) || 0), 0);
   
   // Data e hora atual
   const now = new Date();
@@ -54,6 +54,10 @@ export function generateTISSXML(options: ExportXMLOptions): string {
 
   // Adicionar procedimentos aprovados
   aprovados.forEach((proc, index) => {
+    // Usar valorAprovado se existir (após ajuste), senão usar valorTotal original
+    const valorFinal = proc.valorAprovado || proc.valorTotal || 0;
+    const valorUnitarioFinal = valorFinal / (proc.quantidadeExecutada || 1);
+    
     xml += `            <ans:procedimentoExecutado>
               <ans:sequencialItem>${proc.sequencialItem || (index + 1)}</ans:sequencialItem>
               <ans:procedimento>
@@ -62,8 +66,8 @@ export function generateTISSXML(options: ExportXMLOptions): string {
                 <ans:descricaoProcedimento>${escapeXML(proc.descricaoProcedimento || '')}</ans:descricaoProcedimento>
               </ans:procedimento>
               <ans:quantidadeExecutada>${proc.quantidadeExecutada || 1}</ans:quantidadeExecutada>
-              <ans:valorUnitario>${(proc.valorUnitario || 0).toFixed(2)}</ans:valorUnitario>
-              <ans:valorTotal>${(proc.valorTotal || 0).toFixed(2)}</ans:valorTotal>
+              <ans:valorUnitario>${valorUnitarioFinal.toFixed(2)}</ans:valorUnitario>
+              <ans:valorTotal>${valorFinal.toFixed(2)}</ans:valorTotal>
             </ans:procedimentoExecutado>
 `;
   });
