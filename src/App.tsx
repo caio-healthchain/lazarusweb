@@ -9,10 +9,6 @@ import { msalConfig } from "@/config/auth";
 import { useTokenRenewal } from "@/hooks/useTokenRenewal";
 
 // Pages
-import Index from "./pages/Index";
-import PatientList from "./pages/PatientList";
-import PatientDetails from "./pages/PatientDetails";
-import PatientForm from "./pages/PatientForm";
 import Login from "./pages/Login";
 import ModuleSelection from "./pages/ModuleSelection";
 import ManagerialDashboard from "./pages/ManagerialDashboard";
@@ -77,33 +73,10 @@ const AppContent = () => {
               </ProtectedRoute>
             } />
             
-            {/* Módulo Auditor - Rota principal */}
-            <Route path="/" element={
-              <ProtectedRoute>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <PatientList />
-                </div>
-              </ProtectedRoute>
-            } />
+            {/* Rota raiz - Redireciona para login */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
             
-            <Route path="/patient/new" element={
-              <ProtectedRoute>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <PatientForm />
-                </div>
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/patient/:id" element={
-              <ProtectedRoute>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <PatientDetails />
-                </div>
-              </ProtectedRoute>
-            } />
+
             
             <Route path="/audit/new" element={
               <ProtectedRoute>
