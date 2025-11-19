@@ -111,7 +111,10 @@ export interface GuiaProcedure {
   quantidadeExecutada?: number;
   valorUnitario?: number;
   valorTotal?: number;
+  valorAprovado?: number; // Valor após ajuste (se houver)
   status?: 'PENDING' | 'APPROVED' | 'REJECTED' | string;
+  motivoRejeicao?: string; // Justificativa obrigatória para rejeições
+  categoriaRejeicao?: string; // Categoria da rejeição
   createdAt?: string;
   updatedAt?: string;
 }
