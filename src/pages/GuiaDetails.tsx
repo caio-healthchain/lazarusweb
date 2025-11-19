@@ -53,7 +53,8 @@ const GuiaDetailsNew = () => {
   const { data: logsData, isLoading: logsLoading } = useQuery({
     queryKey: ['guia', numeroGuiaPrestador, 'logs'],
     queryFn: async () => {
-      const response = await fetch(`/api/v1/audit-log/guia/${numeroGuiaPrestador}`);
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://lazarusapi.azure-api.net';
+      const response = await fetch(`${baseUrl}/audits/audit-log/guia/${numeroGuiaPrestador}`);
       if (!response.ok) throw new Error('Erro ao buscar logs');
       return response.json();
     },
