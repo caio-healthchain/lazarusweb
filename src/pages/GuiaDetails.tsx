@@ -23,9 +23,11 @@ import {
 import { ProcedureCard } from '@/components/audit/ProcedureCard';
 import { PendenciasTab } from '@/components/audit/PendenciasTab';
 import { LogsTab } from '@/components/audit/LogsTab';
-import { calculatePendenciasStats } from '@/services/mockValidationData';
+import { RejectModal } from '@/components/audit/RejectModal';
+import { calculatePendenciasStats, generateMockValidations } from '@/services/mockValidationData';
 import { exportGuiaXML } from '@/utils/xmlExporter';
 import { Download } from 'lucide-react';
+import { useState } from 'react';
 
 const GuiaDetailsNew = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,6 +36,9 @@ const GuiaDetailsNew = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'pendencias'|'all'|'pending'|'approved'|'rejected'|'logs'>('pendencias');
   const [selectedProcedures, setSelectedProcedures] = useState<Set<string>>(new Set());
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [procedimentoParaRejeitar, setProcedimentoParaRejeitar] = useState<GuiaProcedure | null>(null);
+  const [valorRecomendadoRejeicao, setValorRecomendadoRejeicao] = useState<number | undefined>(undefined);
 
   const numeroGuiaPrestador = id || '';
 
@@ -109,13 +114,71 @@ const GuiaDetailsNew = () => {
 
   const handleApprove = (procId: string) => {
     const proc = procedimentos.find(p => p.id === procId);
-    const guiaId = proc?.guiaId ? parseInt(proc.guiaId) : undefined;
-    updateStatusMutation.mutate({ id: procId, status: 'APPROVED', guiaId });
+    if (!proc) return;
+    
+    const guiaId = proc.guiaId ? parseInt(proc.guiaId) : undefined;
+    
+    // Calcular valor recomendado (valor contratual)
+    const validacoes = generateMockValidations(proc);
+    const validacaoValor = validacoes.find(v => v.tipo === 'VALOR_CONTRATUAL');
+    const valorRecomendado = validacaoValor?.valorEsperado || proc.valorTotal || 0;
+    
+    // Aplicar valor recomendado automaticamente
+    const procComValorAjustado = {
+      ...proc,
+      valorAprovado: valorRecomendado,
+      status: 'APPROVED'
+    };
+    
+    // Atualizar no backend (assumindo que o backend aceita valorAprovado)
+    updateStatusMutation.mutate({ 
+      id: procId, 
+      status: 'APPROVED', 
+      guiaId,
+      valorAprovado: valorRecomendado 
+    } as any);
+    
+    // Log para auditoria
+    if (valorRecomendado !== proc.valorTotal) {
+      console.log(`[AJUSTE AUTO] Procedimento ${proc.codigoProcedimento}: R$ ${proc.valorTotal?.toFixed(2)} → R$ ${valorRecomendado.toFixed(2)}`);
+    }
   };
   const handleReject = (procId: string) => {
     const proc = procedimentos.find(p => p.id === procId);
-    const guiaId = proc?.guiaId ? parseInt(proc.guiaId) : undefined;
-    updateStatusMutation.mutate({ id: procId, status: 'REJECTED', guiaId });
+    if (!proc) return;
+    
+    // Calcular valor recomendado para exibir no modal
+    const validacoes = generateMockValidations(proc);
+    const validacaoValor = validacoes.find(v => v.tipo === 'VALOR_CONTRATUAL');
+    const valorRecomendado = validacaoValor?.valorEsperado;
+    
+    // Abrir modal de rejeição
+    setProcedimentoParaRejeitar(proc);
+    setValorRecomendadoRejeicao(valorRecomendado);
+    setRejectModalOpen(true);
+  };
+  
+  const handleConfirmReject = (motivoRejeicao: string, categoriaRejeicao: string) => {
+    if (!procedimentoParaRejeitar) return;
+    
+    const guiaId = procedimentoParaRejeitar.guiaId ? parseInt(procedimentoParaRejeitar.guiaId) : undefined;
+    
+    // Atualizar com motivo e categoria
+    updateStatusMutation.mutate({ 
+      id: procedimentoParaRejeitar.id, 
+      status: 'REJECTED', 
+      guiaId,
+      motivoRejeicao,
+      categoriaRejeicao
+    } as any);
+    
+    // Fechar modal
+    setRejectModalOpen(false);
+    setProcedimentoParaRejeitar(null);
+    setValorRecomendadoRejeicao(undefined);
+    
+    // Log para auditoria
+    console.log(`[REJEIÇÃO] Procedimento ${procedimentoParaRejeitar.codigoProcedimento}: ${categoriaRejeicao} - ${motivoRejeicao}`);
   };
   const handleReset = (procId: string) => {
     const proc = procedimentos.find(p => p.id === procId);
@@ -450,6 +513,15 @@ const GuiaDetailsNew = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Modal de Rejeição com Justificativa */}
+      <RejectModal
+        open={rejectModalOpen}
+        onOpenChange={setRejectModalOpen}
+        procedimento={procedimentoParaRejeitar}
+        valorRecomendado={valorRecomendadoRejeicao}
+        onConfirm={handleConfirmReject}
+      />
     </div>
   );
 };
