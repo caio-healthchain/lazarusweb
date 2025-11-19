@@ -1,14 +1,12 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
 import { 
   Activity, 
   FileText, 
   Package, 
   DollarSign, 
   Copy,
-  X,
   CheckCircle,
   XCircle
 } from 'lucide-react';
@@ -111,7 +109,7 @@ export function PendenciaDetailsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] p-0">
+      <DialogContent className="max-w-5xl max-h-[90vh] p-0" hideCloseButton={false}>
         {/* Header */}
         <DialogHeader className={`p-6 pb-4 border-b-4 ${config.borderColor}`}>
           <div className="flex items-start justify-between">
@@ -126,14 +124,6 @@ export function PendenciaDetailsModal({
                 </DialogDescription>
               </div>
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => onOpenChange(false)}
-              className="h-8 w-8"
-            >
-              <X className="h-5 w-5" />
-            </Button>
           </div>
 
           {/* Estatísticas */}
