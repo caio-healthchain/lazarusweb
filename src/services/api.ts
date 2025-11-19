@@ -336,6 +336,10 @@ export const guideService = {
   // Obter status da guia
   getGuiaStatus: (guiaId: number) =>
     apiClient.get<ApiResponse<any>>(`${API_CONFIG.endpoints.procedureApproval}/guia/${guiaId}/status`),
+  
+  // Atualizar status da guia (PENDING, APPROVED, FINALIZED)
+  updateGuideStatus: (numeroGuiaPrestador: string, status: 'PENDING' | 'APPROVED' | 'FINALIZED') =>
+    apiClient.put<ApiResponse<any>>(`${API_CONFIG.endpoints.guias}/${numeroGuiaPrestador}/status`, { status }),
 };
 
 // Serviço de Upload

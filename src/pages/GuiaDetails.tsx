@@ -24,6 +24,8 @@ import { ProcedureCard } from '@/components/audit/ProcedureCard';
 import { PendenciasTab } from '@/components/audit/PendenciasTab';
 import { LogsTab } from '@/components/audit/LogsTab';
 import { calculatePendenciasStats } from '@/services/mockValidationData';
+import { exportGuiaXML } from '@/utils/xmlExporter';
+import { Download } from 'lucide-react';
 
 const GuiaDetailsNew = () => {
   const { id } = useParams<{ id: string }>();
@@ -54,9 +56,18 @@ const GuiaDetailsNew = () => {
     queryKey: ['guia', numeroGuiaPrestador, 'logs'],
     queryFn: async () => {
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://lazarusapi.azure-api.net';
-      const response = await fetch(`${baseUrl}/audits/audit-log/guia/${numeroGuiaPrestador}`);
-      if (!response.ok) throw new Error('Erro ao buscar logs');
-      return response.json();
+      try {
+        const response = await fetch(`${baseUrl}/audits/audit-log/guia/${numeroGuiaPrestador}`);
+        if (!response.ok) {
+          console.warn('Endpoint de logs não disponível, usando logs locais');
+          return [];
+        }
+        const data = await response.json();
+        return Array.isArray(data) ? data : data.data || [];
+      } catch (error) {
+        console.warn('Erro ao buscar logs da API:', error);
+        return [];
+      }
     },
     enabled: Boolean(numeroGuiaPrestador) && activeTab === 'logs',
     retry: 1,
@@ -88,6 +99,7 @@ const GuiaDetailsNew = () => {
       guideService.updateProcedureStatus(id, status, guiaId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['guia', numeroGuiaPrestador, 'procedures'] });
+      queryClient.invalidateQueries({ queryKey: ['guia', numeroGuiaPrestador, 'logs'] });
       toast.success('Status do procedimento atualizado.');
     },
     onError: () => {
@@ -199,11 +211,29 @@ const GuiaDetailsNew = () => {
         loading: `Aprovando toda a guia (${pendingProcedures.length} procedimentos)...`,
         success: () => {
           queryClient.invalidateQueries({ queryKey: ['guia', numeroGuiaPrestador, 'procedures'] });
+          // Após aprovar tudo, perguntar se quer finalizar a guia
+          setTimeout(() => {
+            if (confirm('Guia aprovada com sucesso! Deseja finalizar a guia e removê-la da lista de pendências?')) {
+              handleFinalizeGuia();
+            }
+          }, 500);
           return `Guia aprovada com sucesso! ${pendingProcedures.length} procedimento(s) aprovado(s).`;
         },
         error: 'Erro ao aprovar guia'
       }
     );
+  };
+
+  const handleFinalizeGuia = async () => {
+    try {
+      // Atualizar status da guia para FINALIZED
+      await guideService.updateGuideStatus(numeroGuiaPrestador, 'FINALIZED');
+      toast.success('Guia finalizada com sucesso!');
+      // Voltar para lista de auditorias
+      setTimeout(() => navigate('/audits'), 1000);
+    } catch (error) {
+      toast.error('Erro ao finalizar guia');
+    }
   };
 
   useEffect(() => {
@@ -234,6 +264,26 @@ const GuiaDetailsNew = () => {
             <Badge variant="secondary" className="text-lg px-4 py-2">
               {procedimentos.length} procedimento(s)
             </Badge>
+            <Button 
+              size="lg" 
+              variant="outline"
+              className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+              onClick={() => {
+                try {
+                  exportGuiaXML({
+                    numeroGuiaPrestador,
+                    procedimentos
+                  });
+                  toast.success('XML exportado com sucesso!');
+                } catch (error) {
+                  toast.error(error instanceof Error ? error.message : 'Erro ao exportar XML');
+                }
+              }}
+              disabled={counts.approved === 0}
+            >
+              <Download className="h-5 w-5 mr-2" />
+              Exportar XML
+            </Button>
             <Button 
               size="lg" 
               className="bg-green-600 hover:bg-green-700"
