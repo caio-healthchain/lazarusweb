@@ -35,8 +35,9 @@ const Audits = () => {
   });
 
   // resposta esperada: PaginatedResponse<Guide>
-  const guias = (guiasResponse?.data ?? []) as Guide[];
-  const totalGuias = guiasResponse?.total ?? guias.length;
+  // Filtrar guias finalizadas (não mostrar na lista principal)
+  const guias = ((guiasResponse?.data ?? []) as Guide[]).filter(g => g.status !== 'FINALIZED');
+  const totalGuias = guias.length; // Total de guias não finalizadas
   const totalProcedimentos = useMemo(() => {
     return guias.reduce((acc, g) => acc + (g.valorTotalProcedimentos ? Number(g.valorTotalProcedimentos) : 0), 0);
   }, [guias]);
@@ -48,8 +49,8 @@ const Audits = () => {
   const sessionCounts = useMemo(() => {
     const sessions = guias.map((g) => getAuditSessionName(g.tipoGuia).toLowerCase());
     return {
-      inloco: sessions.filter((s) => s === 'inloco').length,
-      retrospectiva: sessions.filter((s) => s === 'retrospectiva').length,
+      contaparcial: sessions.filter((s) => s === 'contaparcial').length,
+      contafechada: sessions.filter((s) => s === 'contafechada').length,
       all: guias.length,
     };
   }, [guias]);
@@ -232,16 +233,16 @@ const Audits = () => {
           <Tabs defaultValue="all" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="all">Todas <Badge variant="secondary" className="ml-2">{sessionCounts.all}</Badge></TabsTrigger>
-              <TabsTrigger value="inloco">Contas Parciais <Badge variant="secondary" className="ml-2">{sessionCounts.inloco}</Badge></TabsTrigger>
-              <TabsTrigger value="retrospectiva">Contas Fechadas <Badge variant="secondary" className="ml-2">{sessionCounts.retrospectiva}</Badge></TabsTrigger>
+              <TabsTrigger value="contaparcial">Contas Parciais <Badge variant="secondary" className="ml-2">{sessionCounts.contaparcial}</Badge></TabsTrigger>
+              <TabsTrigger value="contafechada">Contas Fechadas <Badge variant="secondary" className="ml-2">{sessionCounts.contafechada}</Badge></TabsTrigger>
             </TabsList>
 
-            {['all','inloco','retrospectiva'].map((view) => {
+            {['all','contaparcial','contafechada'].map((view) => {
               const filteredBase = guias.filter((g) => {
                 const session = getAuditSessionName(g.tipoGuia).toLowerCase();
                 if (view === 'all') return true;
-                if (view === 'inloco') return session === 'inloco';
-                return session === 'retrospectiva';
+                if (view === 'contaparcial') return session === 'contaparcial';
+                return session === 'contafechada';
               });
 
               const filtered = filteredBase
