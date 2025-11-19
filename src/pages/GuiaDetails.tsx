@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { ProcedureCard } from '@/components/audit/ProcedureCard';
 import { PendenciasTab } from '@/components/audit/PendenciasTab';
+import { LogsTab } from '@/components/audit/LogsTab';
 import { calculatePendenciasStats } from '@/services/mockValidationData';
 
 const GuiaDetailsNew = () => {
@@ -29,7 +30,7 @@ const GuiaDetailsNew = () => {
   const navigate = useNavigate();
   const location = useLocation() as { state?: { tipoGuia?: string } };
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<'pendencias'|'all'|'pending'|'approved'|'rejected'>('pendencias');
+  const [activeTab, setActiveTab] = useState<'pendencias'|'all'|'pending'|'approved'|'rejected'|'logs'>('pendencias');
   const [selectedProcedures, setSelectedProcedures] = useState<Set<string>>(new Set());
 
   const numeroGuiaPrestador = id || '';
@@ -47,6 +48,20 @@ const GuiaDetailsNew = () => {
     },
     retry: 1,
   });
+
+  // Query para buscar logs de auditoria
+  const { data: logsData, isLoading: logsLoading } = useQuery({
+    queryKey: ['guia', numeroGuiaPrestador, 'logs'],
+    queryFn: async () => {
+      const response = await fetch(`/api/v1/audit-log/guia/${numeroGuiaPrestador}`);
+      if (!response.ok) throw new Error('Erro ao buscar logs');
+      return response.json();
+    },
+    enabled: Boolean(numeroGuiaPrestador) && activeTab === 'logs',
+    retry: 1,
+  });
+
+  const logs = Array.isArray(logsData) ? logsData : [];
 
   const procedimentos = Array.isArray(data) ? (data as GuiaProcedure[]) : [];
   const sessionName = getAuditSessionName(location.state?.tipoGuia);
@@ -274,7 +289,7 @@ const GuiaDetailsNew = () => {
 
         {/* Tabs de status */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="pendencias">
               Pendências <Badge variant="secondary" className="ml-2">{pendenciasStats.total}</Badge>
             </TabsTrigger>
@@ -282,6 +297,7 @@ const GuiaDetailsNew = () => {
             <TabsTrigger value="pending">Pendentes <Badge variant="secondary" className="ml-2">{counts.pending}</Badge></TabsTrigger>
             <TabsTrigger value="approved">Aprovados <Badge variant="secondary" className="ml-2">{counts.approved}</Badge></TabsTrigger>
             <TabsTrigger value="rejected">Rejeitados <Badge variant="secondary" className="ml-2">{counts.rejected}</Badge></TabsTrigger>
+            <TabsTrigger value="logs">Logs</TabsTrigger>
           </TabsList>
 
           {/* Aba de Pendências */}
@@ -375,7 +391,12 @@ const GuiaDetailsNew = () => {
                 ))}
               </TabsContent>
             );
-          })}
+          }
+
+          {/* Aba de Logs */}
+          <TabsContent value="logs" className="mt-4">
+            <LogsTab logs={logs} isLoading={logsLoading} />
+          </TabsContent>
         </Tabs>
       </div>
     </div>
