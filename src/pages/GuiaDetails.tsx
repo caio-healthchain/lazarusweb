@@ -391,7 +391,7 @@ const GuiaDetailsNew = () => {
                 ))}
               </TabsContent>
             );
-          }
+          })}
 
           {/* Aba de Logs */}
           <TabsContent value="logs" className="mt-4">
