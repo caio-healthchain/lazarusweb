@@ -155,6 +155,36 @@ export function ProcedureCard({
             </div>
           </div>
 
+          {/* Detalhes de Validações com Valores */}
+          {validations.some(v => v.valorEsperado !== undefined) && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">Comparação de Valores</h4>
+              {validations.filter(v => v.valorEsperado !== undefined).map((val, idx) => (
+                <div key={idx} className="grid grid-cols-3 gap-4 text-sm mb-2">
+                  <div>
+                    <p className="text-muted-foreground mb-1">Valor da Guia</p>
+                    <p className="font-medium text-blue-700">
+                      {formatCurrency(val.valorEncontrado)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground mb-1">Valor Contratual</p>
+                    <p className="font-medium text-green-700">
+                      {formatCurrency(val.valorEsperado)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground mb-1">Diferença</p>
+                    <p className={`font-medium ${val.diferenca && val.diferenca > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {val.diferenca ? formatCurrency(Math.abs(val.diferenca)) : '-'}
+                      {val.diferenca && val.diferenca > 0 ? ' (a mais)' : val.diferenca && val.diferenca < 0 ? ' (a menos)' : ''}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Botão de Reset (se não estiver pendente) */}
           {st !== 'PENDING' && (
             <div className="flex justify-end pt-2 border-t">
