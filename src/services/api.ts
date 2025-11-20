@@ -98,6 +98,7 @@ export interface Guide {
   diagnostico?: string;
   dataInicioFaturamento?: string;
   dataFinalFaturamento?: string;
+  auditStatus?: 'PENDING' | 'COMPLETED'; // Status de auditoria baseado nos procedimentos
   createdAt?: string;
   updatedAt?: string;
 }

@@ -47,10 +47,9 @@ const Audits = () => {
   const [sortBy, setSortBy] = useState<'date' | 'value'>('date');
 
   const sessionCounts = useMemo(() => {
-    const sessions = guias.map((g) => getAuditSessionName(g.tipoGuia).toLowerCase());
     return {
-      contaparcial: sessions.filter((s) => s === 'contaparcial').length,
-      contafechada: sessions.filter((s) => s === 'contafechada').length,
+      contaparcial: guias.filter((g) => g.auditStatus === 'PENDING').length,
+      contafechada: guias.filter((g) => g.auditStatus === 'COMPLETED').length,
       all: guias.length,
     };
   }, [guias]);
@@ -239,10 +238,9 @@ const Audits = () => {
 
             {['all','contaparcial','contafechada'].map((view) => {
               const filteredBase = guias.filter((g) => {
-                const session = getAuditSessionName(g.tipoGuia).toLowerCase();
                 if (view === 'all') return true;
-                if (view === 'contaparcial') return session === 'contaparcial';
-                return session === 'contafechada';
+                if (view === 'contaparcial') return g.auditStatus === 'PENDING';
+                return g.auditStatus === 'COMPLETED';
               });
 
               const filtered = filteredBase
