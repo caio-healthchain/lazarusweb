@@ -47,9 +47,11 @@ const Audits = () => {
   const [sortBy, setSortBy] = useState<'date' | 'value'>('date');
 
   const sessionCounts = useMemo(() => {
+    const sessions = guias.map((g) => getAuditSessionName(g.tipoGuia).toLowerCase());
     return {
-      contaparcial: guias.filter((g) => g.auditStatus === 'PENDING').length,
-      contafechada: guias.filter((g) => g.auditStatus === 'COMPLETED').length,
+      contaparcial: sessions.filter((s) => s === 'contaparcial').length,
+      contafechada: sessions.filter((s) => s === 'contafechada').length,
+      finalizadas: guias.filter((g) => g.auditStatus === 'COMPLETED').length,
       all: guias.length,
     };
   }, [guias]);
@@ -230,17 +232,24 @@ const Audits = () => {
         {/* Guias agrupadas por sessão */}
         {!isLoading && !error && (
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="all">Todas <Badge variant="secondary" className="ml-2">{sessionCounts.all}</Badge></TabsTrigger>
               <TabsTrigger value="contaparcial">Contas Parciais <Badge variant="secondary" className="ml-2">{sessionCounts.contaparcial}</Badge></TabsTrigger>
               <TabsTrigger value="contafechada">Contas Fechadas <Badge variant="secondary" className="ml-2">{sessionCounts.contafechada}</Badge></TabsTrigger>
+              <TabsTrigger value="finalizadas">Finalizadas <Badge variant="secondary" className="ml-2">{sessionCounts.finalizadas}</Badge></TabsTrigger>
             </TabsList>
 
-            {['all','contaparcial','contafechada'].map((view) => {
+            {['all','contaparcial','contafechada','finalizadas'].map((view) => {
               const filteredBase = guias.filter((g) => {
+                // Filtrar guias finalizadas das outras abas
+                if (view !== 'finalizadas' && g.auditStatus === 'COMPLETED') return false;
+                
                 if (view === 'all') return true;
-                if (view === 'contaparcial') return g.auditStatus === 'PENDING';
-                return g.auditStatus === 'COMPLETED';
+                if (view === 'finalizadas') return g.auditStatus === 'COMPLETED';
+                
+                const session = getAuditSessionName(g.tipoGuia).toLowerCase();
+                if (view === 'contaparcial') return session === 'contaparcial';
+                return session === 'contafechada';
               });
 
               const filtered = filteredBase
