@@ -20,6 +20,8 @@ import { Contracts } from "./pages/Contracts";
 import { ContractDetails } from "./pages/ContractDetails";
 import TMIReport from "./pages/TMIReport";
 import NotFound from "./pages/NotFound";
+import Analista from "./pages/Analista";
+import AnalistaDetails from "./pages/AnalistaDetails";
 
 // Components
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -70,6 +72,19 @@ const AppContent = () => {
                   <Header />
                   <ManagerialChat />
                 </div>
+              </ProtectedRoute>
+            } />
+            
+            {/* Módulo Analista */}
+            <Route path="/analista" element={
+              <ProtectedRoute>
+                <Analista />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/analista/:guideId" element={
+              <ProtectedRoute>
+                <AnalistaDetails />
               </ProtectedRoute>
             } />
             

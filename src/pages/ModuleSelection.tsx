@@ -12,7 +12,8 @@ import {
   Brain,
   ArrowRight,
   Shield,
-  Hospital
+  Hospital,
+  FileCheck
 } from 'lucide-react';
 
 const ModuleSelection = () => {
@@ -48,6 +49,21 @@ const ModuleSelection = () => {
         'Insights de gestão'
       ],
       route: '/gerencial',
+      available: true
+    },
+    {
+      id: 'analista',
+      title: 'Módulo Analista',
+      description: 'Checklist de documentação obrigatória e conformidade',
+      icon: FileCheck,
+      color: 'bg-purple-600',
+      features: [
+        'Checklist de documentos',
+        'Status de conformidade',
+        'Validação de XMLs',
+        'Gestão de pendências'
+      ],
+      route: '/analista',
       available: true
     }
   ];
@@ -103,7 +119,7 @@ const ModuleSelection = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {modules.map((module) => {
             const IconComponent = module.icon;
             
