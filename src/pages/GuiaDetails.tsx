@@ -119,7 +119,10 @@ const GuiaDetailsNew = () => {
     const guiaId = proc.guiaId ? parseInt(proc.guiaId) : undefined;
     
     // Calcular valor recomendado (valor contratual)
-    const validacoes = generateMockValidations(proc);
+    const validacoes = generateMockValidations(
+      proc.codigoProcedimento || '',
+      Number(proc.valorTotal || proc.valorUnitario || 0)
+    );
     const validacaoValor = validacoes.find(v => v.tipo === 'VALOR_CONTRATUAL');
     const valorRecomendado = validacaoValor?.valorEsperado || proc.valorTotal || 0;
     
