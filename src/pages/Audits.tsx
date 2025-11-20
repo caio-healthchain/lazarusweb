@@ -37,26 +37,32 @@ const Audits = () => {
   // resposta esperada: PaginatedResponse<Guide>
   // Filtrar guias finalizadas (não mostrar na lista principal)
   const guias = ((guiasResponse?.data ?? []) as Guide[]).filter(g => g.status !== 'FINALIZED');
-  const totalGuias = guias.length; // Total de guias não finalizadas
+  
+  // Separar guias finalizadas das ativas
+  const guiasAtivas = useMemo(() => guias.filter(g => g.auditStatus !== 'COMPLETED'), [guias]);
+  const guiasFinalizadas = useMemo(() => guias.filter(g => g.auditStatus === 'COMPLETED'), [guias]);
+  
+  const totalGuias = guiasAtivas.length; // Total de guias ativas (não finalizadas)
   const totalProcedimentos = useMemo(() => {
-    return guias.reduce((acc, g) => acc + (g.valorTotalProcedimentos ? Number(g.valorTotalProcedimentos) : 0), 0);
-  }, [guias]);
+    return guiasAtivas.reduce((acc, g) => acc + (g.valorTotalProcedimentos ? Number(g.valorTotalProcedimentos) : 0), 0);
+  }, [guiasAtivas]);
 
   // UX: estado local para filtro rápido por status e ordenação
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [sortBy, setSortBy] = useState<'date' | 'value'>('date');
 
   const sessionCounts = useMemo(() => {
-    const sessions = guias.map((g) => getAuditSessionName(g.tipoGuia).toLowerCase());
+    // Contar apenas guias ativas (não finalizadas)
+    const sessions = guiasAtivas.map((g) => getAuditSessionName(g.tipoGuia).toLowerCase());
     return {
       contaparcial: sessions.filter((s) => s === 'contaparcial').length,
       contafechada: sessions.filter((s) => s === 'contafechada').length,
-      finalizadas: guias.filter((g) => g.auditStatus === 'COMPLETED').length,
-      all: guias.length,
+      finalizadas: guiasFinalizadas.length,
+      all: guiasAtivas.length,
     };
-  }, [guias]);
+  }, [guiasAtivas, guiasFinalizadas]);
 
-  // Calcular TMI Médio
+  // Calcular TMI Médio (considera todas as guias, incluindo finalizadas)
   const tmiMedio = useMemo(() => {
     const tmis = guias
       .map(g => calcularTMI(g.dataInicioFaturamento, g.dataFinalFaturamento))
