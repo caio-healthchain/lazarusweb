@@ -148,7 +148,10 @@ const GuiaDetailsNew = () => {
     if (!proc) return;
     
     // Calcular valor recomendado para exibir no modal
-    const validacoes = generateMockValidations(proc);
+    const validacoes = generateMockValidations(
+      proc.codigoProcedimento || '',
+      Number(proc.valorTotal || proc.valorUnitario || 0)
+    );
     const validacaoValor = validacoes.find(v => v.tipo === 'VALOR_CONTRATUAL');
     const valorRecomendado = validacaoValor?.valorEsperado;
     
