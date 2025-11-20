@@ -104,7 +104,7 @@ export const RejectModal = ({ open, onOpenChange, procedimento, valorRecomendado
             <Label htmlFor="categoria">
               Categoria de Rejeição <span className="text-red-500">*</span>
             </Label>
-            <Select value={categoriaRejeicao} onValueChange={setCategoriaRejeicao}>
+            <Select value={categoriaRejeicao || undefined} onValueChange={setCategoriaRejeicao}>
               <SelectTrigger id="categoria">
                 <SelectValue placeholder="Selecione a categoria" />
               </SelectTrigger>
