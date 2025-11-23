@@ -10,7 +10,8 @@ import {
   Shield,
   Building2,
   Loader2,
-  LogOut
+  LogOut,
+  Activity
 } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
@@ -68,6 +69,26 @@ const HospitalSelection = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Função para obter ícone e cor baseado no código do hospital
+  const getHospitalIcon = (code: string) => {
+    const icons: Record<string, { icon: React.ReactNode; color: string }> = {
+      h9j: {
+        icon: <Activity className="h-8 w-8 text-white" />,
+        color: '#3B82F6', // Azul
+      },
+      hsl: {
+        icon: <Hospital className="h-8 w-8 text-white" />,
+        color: '#10B981', // Verde
+      },
+      demo: {
+        icon: <Shield className="h-8 w-8 text-white" />,
+        color: '#8B5CF6', // Roxo
+      },
+    };
+
+    return icons[code] || { icon: <Hospital className="h-8 w-8 text-white" />, color: '#3B82F6' };
   };
 
   const handleSelectHospital = async (hospital: HospitalWithProfiles) => {
@@ -219,7 +240,9 @@ const HospitalSelection = () => {
                       <div
                         className="flex items-center justify-center w-16 h-16 rounded-xl"
                         style={{
-                          backgroundColor: hospital.primaryColor || '#3B82F6',
+                          backgroundColor: hospital.logoUrl 
+                            ? (hospital.primaryColor || '#3B82F6')
+                            : getHospitalIcon(hospital.code).color,
                           opacity: 0.9,
                         }}
                       >
@@ -230,7 +253,7 @@ const HospitalSelection = () => {
                             className="w-12 h-12 object-contain"
                           />
                         ) : (
-                          <Hospital className="h-8 w-8 text-white" />
+                          getHospitalIcon(hospital.code).icon
                         )}
                       </div>
                       <Badge className="bg-emerald-500/20 text-emerald-200 border-emerald-500/30">
