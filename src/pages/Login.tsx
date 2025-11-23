@@ -53,23 +53,37 @@ const Login = () => {
       setLoading(true);
       setError(null);
 
+      // Passo 1: Login popup do Azure AD
       const response = await instance.loginPopup(loginRequest);
       
-      if (response.account) {
-        // Extrair informações do usuário
-        const user = {
-          id: response.account.homeAccountId,
-          name: response.account.name || 'Usuário',
-          email: response.account.username,
-          roles: ['auditor'], // Roles viriam do token ou API
-          avatar: undefined,
-        };
+      if (response.account && response.accessToken) {
+        // Passo 2: Enviar access token do Azure AD para o backend validar e gerar JWT próprio
+        const axios = (await import('axios')).default;
+        const { API_CONFIG } = await import('@/config/auth');
+        
+        const backendResponse = await axios.post(
+          `${API_CONFIG.baseUrl}/users/users/auth/azure/callback`,
+          { 
+            azureAccessToken: response.accessToken,
+            azureIdToken: response.idToken
+          }
+        );
 
-        setUser(user);
-        setAccessToken(response.accessToken);
+        // Passo 3: Salvar JWT do backend (não o token do Azure)
+        const { accessToken, user: userData, hospitals } = backendResponse.data;
+        
+        setUser({
+          id: userData.id,
+          name: userData.name,
+          email: userData.email,
+          roles: ['auditor'],
+          avatar: userData.avatar,
+        });
+        
+        setAccessToken(accessToken); // JWT do ms-users
         setAuthenticated(true);
         
-        toast.success(`Bem-vindo, ${user.name}!`);
+        toast.success(`Bem-vindo, ${userData.name}!`);
         
         // Redirecionar para seleção de hospital
         window.location.href = '/select-hospital';
