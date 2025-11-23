@@ -45,7 +45,7 @@ const Login = () => {
 
   // Redirecionar se já autenticado
   if (isAuthenticated) {
-    return <Navigate to="/modules" replace />;
+    return <Navigate to="/select-hospital" replace />;
   }
 
   const handleAzureLogin = async () => {
@@ -70,6 +70,9 @@ const Login = () => {
         setAuthenticated(true);
         
         toast.success(`Bem-vindo, ${user.name}!`);
+        
+        // Redirecionar para seleção de hospital
+        window.location.href = '/select-hospital';
       }
     } catch (error: any) {
       console.error('Erro no login Azure AD:', error);

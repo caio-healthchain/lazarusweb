@@ -10,6 +10,7 @@ import { useTokenRenewal } from "@/hooks/useTokenRenewal";
 
 // Pages
 import Login from "./pages/Login";
+import HospitalSelection from "./pages/HospitalSelection";
 import ModuleSelection from "./pages/ModuleSelection";
 import ManagerialDashboard from "./pages/ManagerialDashboard";
 import ManagerialChat from "./pages/ManagerialChat";
@@ -48,6 +49,13 @@ const AppContent = () => {
           <Routes>
             {/* Rota pública de login */}
             <Route path="/login" element={<Login />} />
+            
+            {/* Seleção de hospital (após login Azure AD) */}
+            <Route path="/select-hospital" element={
+              <ProtectedRoute>
+                <HospitalSelection />
+              </ProtectedRoute>
+            } />
             
             {/* Seleção de módulos */}
             <Route path="/modules" element={
