@@ -49,7 +49,7 @@ const HospitalSelection = () => {
     try {
       setLoading(true);
 
-      const response = await axios.get(`${API_CONFIG.baseUrl}/users/me/hospitals`, {
+      const response = await axios.get(`${API_CONFIG.baseUrl}/users/users/me/hospitals`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -75,7 +75,7 @@ const HospitalSelection = () => {
       setSelecting(hospital.id);
 
       const response = await axios.post(
-        `${API_CONFIG.baseUrl}/users/auth/select-hospital`,
+        `${API_CONFIG.baseUrl}/users/users/auth/select-hospital`,
         { hospitalId: hospital.id },
         {
           headers: {
