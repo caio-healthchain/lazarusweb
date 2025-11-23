@@ -3,9 +3,9 @@ import { Configuration, PopupRequest } from "@azure/msal-browser";
 // Configuração do Azure AD
 export const msalConfig: Configuration = {
   auth: {
-    clientId: import.meta.env.VITE_AZURE_CLIENT_ID || "demo-client-id",
-    authority: import.meta.env.VITE_AZURE_AUTHORITY || "https://login.microsoftonline.com/demo-tenant",
-    redirectUri: import.meta.env.VITE_AZURE_REDIRECT_URI || "https://lazarus.healthchainsolutions.com.br/",
+    clientId: import.meta.env.VITE_AZURE_CLIENT_ID || "24453178-1a7a-4be3-b13a-09572d629164",
+    authority: import.meta.env.VITE_AZURE_AUTHORITY || "https://login.microsoftonline.com/23aa4fc5-fa33-4035-a684-909874c0b395",
+    redirectUri: import.meta.env.VITE_AZURE_REDIRECT_URI || "https://lazarus.healthchainsolutions.com.br/auth/callback",
   },
   cache: {
     cacheLocation: "sessionStorage",
