@@ -112,13 +112,9 @@ const HospitalSelection = () => {
 
       toast.success(`Acessando ${hospital.name}...`);
 
-      // Redirecionar para o subdomain do hospital
-      if (hospital.customDomain) {
-        window.location.href = redirectUrl;
-      } else {
-        // Se não tem domínio customizado, usar subdomain
-        window.location.href = `https://${hospital.subdomain}.healthchainsolutions.com.br/modules`;
-      }
+      // Temporariamente, redirecionar todos para a mesma URL
+      // TODO: Implementar subdomínios quando os hospitais estiverem configurados
+      window.location.href = 'https://lazarus.healthchainsolutions.com.br/modules';
     } catch (error: any) {
       console.error('Erro ao selecionar hospital:', error);
       toast.error('Erro ao acessar hospital');

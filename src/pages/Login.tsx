@@ -257,8 +257,8 @@ const Login = () => {
                   Entrar com Azure AD
                 </Button>
 
-                {/* Divider */}
-                <div className="relative">
+                {/* Demo Access - Desabilitado */}
+                {/* <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t border-white/20" />
                   </div>
@@ -267,21 +267,16 @@ const Login = () => {
                   </div>
                 </div>
 
-                {/* Demo Access */}
                 <Button
                   onClick={handleDemoLogin}
-                  disabled={isLoading}
+                  disabled={true}
                   variant="outline"
                   className="w-full bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/30 h-12 text-base font-medium"
                   size="lg"
                 >
-                  {isLoading ? (
-                    <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                  ) : (
-                    <Sparkles className="mr-3 h-5 w-5" />
-                  )}
+                  <Sparkles className="mr-3 h-5 w-5" />
                   Acesso Demo
-                </Button>
+                </Button> */}
 
                 {/* Request Access (Disabled for now) */}
                 <Dialog open={showAccessForm} onOpenChange={setShowAccessForm}>
