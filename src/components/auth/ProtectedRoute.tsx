@@ -11,6 +11,13 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children, requiredRoles = [] }: ProtectedRouteProps) => {
   const { isAuthenticated, user, isLoading } = useAuthStore();
   const location = useLocation();
+  
+  // Bypass de autenticação para desenvolvimento local
+  const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === 'true';
+  
+  if (bypassAuth) {
+    return <>{children}</>;
+  }
 
   // Mostrar loading enquanto verifica autenticação
   if (isLoading) {

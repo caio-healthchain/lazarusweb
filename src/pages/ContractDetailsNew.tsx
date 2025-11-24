@@ -13,16 +13,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ArrowLeft, Search, FileText, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Search, FileText, AlertCircle, Edit, Settings } from 'lucide-react';
+import { EditContractItemDialog } from '@/components/contracts/EditContractItemDialog';
+import { useToast } from '@/hooks/use-toast';
 
 export function ContractDetailsNew() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [contract, setContract] = useState<Contract | null>(null);
   const [items, setItems] = useState<ContractItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [editingItem, setEditingItem] = useState<ContractItem | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -46,6 +51,36 @@ export function ContractDetailsNew() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleSaveItem(item: ContractItem) {
+    try {
+      // Aqui você implementaria a chamada à API para atualizar o item
+      // Por enquanto, vamos apenas atualizar localmente
+      const updatedItems = items.map((i) => (i.id === item.id ? item : i));
+      setItems(updatedItems);
+      
+      toast({
+        title: 'Item atualizado',
+        description: 'As informações do item foram atualizadas com sucesso.',
+      });
+      
+      // Recarregar dados do servidor
+      if (id) {
+        loadContractDetails(id);
+      }
+    } catch (error) {
+      toast({
+        title: 'Erro ao atualizar',
+        description: 'Não foi possível atualizar o item. Tente novamente.',
+        variant: 'destructive',
+      });
+    }
+  }
+
+  function handleEditItem(item: ContractItem) {
+    setEditingItem(item);
+    setDialogOpen(true);
   }
 
   const filteredItems = items.filter(
@@ -178,7 +213,8 @@ export function ContractDetailsNew() {
                     <TableHead className="font-semibold text-purple-900 text-center" colSpan={2}>
                       Tempo de utilização
                     </TableHead>
-                    <TableHead className="font-semibold text-purple-900 text-right">Valor 2025 a partir de</TableHead>
+                    <TableHead className="font-semibold text-purple-900 text-right">Valor 2025</TableHead>
+                    <TableHead className="font-semibold text-purple-900 text-center">Ações</TableHead>
                   </TableRow>
                   <TableRow className="bg-purple-50">
                     <TableHead></TableHead>
@@ -186,6 +222,7 @@ export function ContractDetailsNew() {
                     <TableHead></TableHead>
                     <TableHead className="font-medium text-purple-800">Sala cirúrgica</TableHead>
                     <TableHead className="font-medium text-purple-800">Permanência</TableHead>
+                    <TableHead></TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -223,6 +260,16 @@ export function ContractDetailsNew() {
                       <TableCell className="text-right font-medium">
                         {contractsUtils.formatCurrency(item.valorContratado)}
                       </TableCell>
+                      <TableCell className="text-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditItem(item)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -231,6 +278,14 @@ export function ContractDetailsNew() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Dialog */}
+      <EditContractItemDialog
+        item={editingItem}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onSave={handleSaveItem}
+      />
     </div>
   );
 }

@@ -18,7 +18,7 @@ import NewAudit from "./pages/NewAudit";
 import Audits from "./pages/Audits";
 import GuiaDetails from "./pages/GuiaDetails";
 import { Contracts } from "./pages/Contracts";
-import { ContractDetails } from "./pages/ContractDetails";
+import { ContractDetailsNew } from "./pages/ContractDetailsNew";
 import TMIReport from "./pages/TMIReport";
 import NotFound from "./pages/NotFound";
 import Analista from "./pages/Analista";
@@ -154,7 +154,7 @@ const AppContent = () => {
               <ProtectedRoute>
                 <div className="min-h-screen bg-background">
                   <Header />
-                  <ContractDetails />
+                  <ContractDetailsNew />
                 </div>
               </ProtectedRoute>
             } />
