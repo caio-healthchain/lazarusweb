@@ -46,6 +46,7 @@ export const API_CONFIG = {
     
     // Endpoints específicos do sistema
     validations: '/validations',
+    auditoriaValidacoes: '/audits/api/v1/validations',
     pendencies: '/pendencies',
     materials: '/materials',
     extraPackages: '/extra-packages',

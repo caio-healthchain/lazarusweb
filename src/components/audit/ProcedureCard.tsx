@@ -7,7 +7,8 @@ import { CheckCircle, XCircle, Loader2, AlertCircle } from 'lucide-react';
 import { ValidationBadges } from './ValidationBadges';
 import { DUTModal, DUTData } from './DUTModal';
 import { generateMockValidations, getMockDUT, getPorteCirurgico, isProcedimentoCirurgico } from '@/services/mockValidationData';
-import { GuiaProcedure } from '@/services/api';
+import { GuiaProcedure, auditoriaValidacoesService, AuditoriaValidacao } from '@/services/api';
+import { useEffect } from 'react';
 
 interface ProcedureCardProps {
   procedure: GuiaProcedure;
@@ -32,14 +33,45 @@ export function ProcedureCard({
 }: ProcedureCardProps) {
   const [dutModalOpen, setDutModalOpen] = useState(false);
   const [dutData, setDutData] = useState<DUTData | null>(null);
+  const [realValidations, setRealValidations] = useState<AuditoriaValidacao[]>([]);
+  const [loadingValidations, setLoadingValidations] = useState(false);
 
   const st = (procedure.status || 'PENDING').toUpperCase();
   const statusBadge = st === 'APPROVED' ? 'bg-green-100 text-green-800' : 
                       st === 'REJECTED' ? 'bg-red-100 text-red-800' : 
                       'bg-yellow-100 text-yellow-800';
 
-  // Gerar validações mockadas
-  const validations = generateMockValidations(
+  // Buscar validações reais do backend
+  useEffect(() => {
+    const fetchValidations = async () => {
+      if (!procedure.id) return;
+      
+      setLoadingValidations(true);
+      try {
+        const response = await auditoriaValidacoesService.getByProcedimento(Number(procedure.id));
+        if (response.success && response.data) {
+          setRealValidations(response.data);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar validações:', error);
+        // Se falhar, usa mocks como fallback
+      } finally {
+        setLoadingValidations(false);
+      }
+    };
+
+    fetchValidations();
+  }, [procedure.id]);
+
+  // Usar validações reais se disponível, senão usar mockadas
+  const validations = realValidations.length > 0 ? realValidations.map(v => ({
+    tipo: v.tipoValidacao,
+    status: v.status === 'CONFORME' ? 'CONFORME' : v.status === 'PENDENTE' ? 'NAO_CONFORME' : 'ALERTA',
+    mensagem: v.mensagem || '',
+    valorEsperado: v.valorEsperado,
+    valorEncontrado: v.valorEncontrado,
+    diferenca: v.diferenca
+  })) : generateMockValidations(
     procedure.codigoProcedimento || '',
     Number(procedure.valorTotal || procedure.valorUnitario || 0)
   );

@@ -231,6 +231,28 @@ export const validationsService = {
     apiClient.post<ApiResponse<Validation>>(`${API_CONFIG.endpoints.validations}/${id}/reject`, { reason }),
 };
 
+export interface AuditoriaValidacao {
+  id: string;
+  guiaId: number;
+  procedimentoId: number;
+  tipoValidacao: string;
+  status: string;
+  mensagem?: string;
+  valorEsperado?: number;
+  valorEncontrado?: number;
+  diferenca?: number;
+  fonteValor?: string;
+  metadata?: any;
+}
+
+export const auditoriaValidacoesService = {
+  getByGuia: (guiaId: number) =>
+    apiClient.get<ApiResponse<AuditoriaValidacao[]>>(`${API_CONFIG.endpoints.auditoriaValidacoes}/guia/${guiaId}`),
+
+  getByProcedimento: (procedimentoId: number) =>
+    apiClient.get<ApiResponse<AuditoriaValidacao[]>>(`${API_CONFIG.endpoints.auditoriaValidacoes}/procedimento/${procedimentoId}`),
+};
+
 export const materialsService = {
   getAll: (params?: { search?: string; covered?: boolean }) =>
     apiClient.get<PaginatedResponse<Material>>(API_CONFIG.endpoints.materials, { params }),
