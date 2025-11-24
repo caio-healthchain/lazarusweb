@@ -23,7 +23,20 @@ export interface ContractItem {
   valorMaximo: number | null;
   quantidadeMaxima: number | null;
   tipoItem: string;
+  tipoAnestesia?: string | null;
+  tempoSalaCirurgica?: string | null;
+  tempoPermanencia?: string | null;
   pacoteId?: string | null;
+  materiaisInclusos?: MaterialIncluso[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MaterialIncluso {
+  id: string;
+  contratoItemId: string;
+  descricaoMaterial: string;
+  quantidade: number;
   createdAt?: string;
   updatedAt?: string;
 }
