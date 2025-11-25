@@ -207,36 +207,26 @@ export function ContractDetailsNew() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-purple-100">
-                    <TableHead className="font-semibold text-purple-900">Descrição do procedimento</TableHead>
-                    <TableHead className="font-semibold text-purple-900">Materiais inclusos</TableHead>
-                    <TableHead className="font-semibold text-purple-900">Tipo de anestesia</TableHead>
-                    <TableHead className="font-semibold text-purple-900 text-center" colSpan={2}>
-                      Tempo de utilização
-                    </TableHead>
-                    <TableHead className="font-semibold text-purple-900 text-right">Valor 2025</TableHead>
-                    <TableHead className="font-semibold text-purple-900 text-center">Ações</TableHead>
-                  </TableRow>
-                  <TableRow className="bg-purple-50">
-                    <TableHead></TableHead>
-                    <TableHead></TableHead>
-                    <TableHead></TableHead>
-                    <TableHead className="font-medium text-purple-800">Sala cirúrgica</TableHead>
-                    <TableHead className="font-medium text-purple-800">Permanência</TableHead>
-                    <TableHead></TableHead>
-                    <TableHead></TableHead>
+                    <TableHead className="font-semibold text-purple-900 w-[25%]">Descrição do procedimento</TableHead>
+                    <TableHead className="font-semibold text-purple-900 w-[20%]">Materiais inclusos</TableHead>
+                    <TableHead className="font-semibold text-purple-900 w-[12%]">Tipo de anestesia</TableHead>
+                    <TableHead className="font-semibold text-purple-900 text-center w-[12%]">Sala cirúrgica</TableHead>
+                    <TableHead className="font-semibold text-purple-900 text-center w-[15%]">Permanência</TableHead>
+                    <TableHead className="font-semibold text-purple-900 text-right w-[10%]">Valor 2025</TableHead>
+                    <TableHead className="font-semibold text-purple-900 text-center w-[6%]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredItems.map((item, index) => (
                     <TableRow key={item.id} className={index % 2 === 0 ? 'bg-white' : 'bg-purple-50'}>
-                      <TableCell className="max-w-md">
+                      <TableCell className="align-top">
                         <div className="font-medium">
                           {item.descricao || <span className="text-gray-400">Código TUSS: {item.codigoTUSS}</span>}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="align-top">
                         {item.materiaisInclusos && item.materiaisInclusos.length > 0 ? (
-                          <div className="text-sm">
+                          <div className="text-sm space-y-1">
                             {item.materiaisInclusos.map((mat, idx) => (
                               <div key={mat.id}>
                                 {mat.quantidade > 1 ? `${mat.quantidade.toString().padStart(2, '0')} ` : ''}
@@ -248,19 +238,19 @@ export function ContractDetailsNew() {
                           <span className="text-gray-400">Não Incluso</span>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="align-top">
                         {item.tipoAnestesia || <span className="text-gray-400">-</span>}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="align-top text-center">
                         {item.tempoSalaCirurgica || <span className="text-gray-400">-</span>}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="align-top text-center">
                         {item.tempoPermanencia || <span className="text-gray-400">-</span>}
                       </TableCell>
-                      <TableCell className="text-right font-medium">
+                      <TableCell className="align-top text-right font-medium">
                         {contractsUtils.formatCurrency(item.valorContratado)}
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="align-top text-center">
                         <Button
                           variant="ghost"
                           size="sm"
