@@ -15,7 +15,7 @@ import {
   MessageSquare,
   Brain
 } from 'lucide-react';
-import ChatService from '@/services/chatService';
+import { sendMessage } from '@/services/chatService';
 
 // Novos componentes
 import ContractsExpiringCard from '@/components/dashboard/ContractsExpiringCard';
@@ -39,9 +39,7 @@ const TopProceduresCard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await ChatService.sendMessage({
-          question: 'Quais foram os 5 procedimentos mais realizados este mês?'
-        });
+        const response = await sendMessage('Quais foram os 5 procedimentos mais realizados este mês?', 'conv_dashboard');
         
         if (response.metadata?.procedures) {
           setProcedures(response.metadata.procedures);
@@ -89,9 +87,7 @@ const SavingsCard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await ChatService.sendMessage({
-          question: 'Quanto eu tive de saving com correções este mês?'
-        });
+        const response = await sendMessage('Quanto eu tive de saving com correções este mês?', 'conv_dashboard');
         
         if (response.metadata?.saving_total) {
           setSavings(response.metadata);
