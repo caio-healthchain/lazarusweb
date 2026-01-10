@@ -46,7 +46,7 @@ export const useCBHPMChat = () => {
 
       // Enviar para o orquestrador
       const chatRequest: ChatRequest = {
-        question: message,
+        message: message,
         userId: userId,
         conversationId: `conv_${Date.now()}`
       };

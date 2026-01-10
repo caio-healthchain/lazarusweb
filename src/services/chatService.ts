@@ -10,7 +10,7 @@ export interface ChatResponse {
 }
 
 export interface ChatRequest {
-  question: string;
+  message: string; // Campo obrigatório conforme esperado pelo ms-chat-ai
   userId?: string;
   conversationId?: string;
   context?: Record<string, any>;
@@ -47,7 +47,7 @@ class ChatService {
       console.error('URL tentada:', `${this.baseURL}${this.chatEndpoint}`);
       console.error('Status:', error.response?.status);
       console.error('Dados do erro:', error.response?.data);
-      throw new Error(error.response?.data?.message || 'Erro ao processar pergunta');
+      throw new Error(error.response?.data?.message || error.response?.data?.error || 'Erro ao processar pergunta');
     }
   }
 
