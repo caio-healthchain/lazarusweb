@@ -18,21 +18,35 @@ export interface ChatRequest {
 
 class ChatService {
   private baseURL: string;
+  private chatEndpoint: string;
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_ORCHESTRATOR_URL || 'http://localhost:3005';
+    // URL do APIM em produção
+    this.baseURL = import.meta.env.VITE_ORCHESTRATOR_URL || 'https://lazarusapi.azure-api.net';
+    // Endpoint específico para o chat
+    this.chatEndpoint = '/chatai/ask';
   }
 
   async sendMessage(request: ChatRequest): Promise<ChatResponse> {
     try {
-      const response = await axios.post(`${this.baseURL}/api/v1/chat`, request, {
+      const endpoint = `${this.baseURL}${this.chatEndpoint}`;
+      console.log('📤 Enviando pergunta para:', endpoint);
+      console.log('📋 Payload:', request);
+      
+      const response = await axios.post(endpoint, request, {
         headers: {
           'Content-Type': 'application/json',
         },
+        timeout: 30000,
       });
+      
+      console.log('✅ Resposta recebida:', response.data);
       return response.data;
     } catch (error: any) {
-      console.error('Erro ao enviar mensagem:', error);
+      console.error('❌ Erro ao enviar mensagem:', error);
+      console.error('URL tentada:', `${this.baseURL}${this.chatEndpoint}`);
+      console.error('Status:', error.response?.status);
+      console.error('Dados do erro:', error.response?.data);
       throw new Error(error.response?.data?.message || 'Erro ao processar pergunta');
     }
   }
