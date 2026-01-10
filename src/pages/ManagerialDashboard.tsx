@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,7 @@ import {
   MessageSquare,
   Brain
 } from 'lucide-react';
+import ChatService from '@/services/chatService';
 
 // Novos componentes
 import ContractsExpiringCard from '@/components/dashboard/ContractsExpiringCard';
@@ -30,6 +31,109 @@ import {
   mockPaymentDelays,
   mockUnprofitableProcedures
 } from '@/data/managerialMockData';
+
+const TopProceduresCard = () => {
+  const [procedures, setProcedures] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await ChatService.sendMessage({
+          question: 'Quais foram os 5 procedimentos mais realizados este mês?'
+        });
+        
+        if (response.metadata?.procedures) {
+          setProcedures(response.metadata.procedures);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar procedimentos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <BarChart3 className="mr-2 h-5 w-5 text-blue-500" />
+          Procedimentos Mais Realizados
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <p className="text-sm text-gray-500">Carregando...</p>
+        ) : (
+          <div className="space-y-3">
+            {procedures.map((proc: any, index: number) => (
+              <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                <span className="text-sm font-medium">{proc.name}</span>
+                <Badge variant="secondary">{proc.count}x</Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const SavingsCard = () => {
+  const [savings, setSavings] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await ChatService.sendMessage({
+          question: 'Quanto eu tive de saving com correções este mês?'
+        });
+        
+        if (response.metadata?.saving_total) {
+          setSavings(response.metadata);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar savings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return (
+    <Card className="bg-gradient-to-br from-green-50 to-emerald-50">
+      <CardHeader>
+        <CardTitle className="flex items-center">
+          <DollarSign className="mr-2 h-5 w-5 text-green-600" />
+          Economia com Correções
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <p className="text-sm text-gray-500">Carregando...</p>
+        ) : savings ? (
+          <div className="space-y-2">
+            <p className="text-3xl font-bold text-green-600">
+              R$ {(savings.saving_total / 1000).toFixed(1)}k
+            </p>
+            <p className="text-sm text-gray-600">
+              {savings.total_corrections} correções realizadas
+            </p>
+            <p className="text-xs text-gray-500">
+              Percentual: {savings.saving_percentage}%
+            </p>
+          </div>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+};
 
 const ManagerialDashboard = () => {
   const navigate = useNavigate();
@@ -182,6 +286,9 @@ const ManagerialDashboard = () => {
 
           {/* Procedimentos com Prejuízo */}
           <UnprofitableProceduresCard procedures={mockUnprofitableProcedures} />
+
+          <TopProceduresCard />
+          <SavingsCard />
         </div>
       </div>
 

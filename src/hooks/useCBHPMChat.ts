@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import CBHPMRagService, { CBHPMProcedure, CBHPMChatResponse } from '../services/cbhpmRagService';
+import ChatService, { ChatResponse, ChatRequest } from '../services/chatService';
 
 export interface ChatMessage {
   id: string;
@@ -7,29 +7,26 @@ export interface ChatMessage {
   sender: 'user' | 'ai';
   timestamp: Date;
   type: 'text' | 'procedures' | 'error';
-  procedures?: CBHPMProcedure[];
-  metadata?: {
-    total_found?: number;
-    context?: string;
-    query_type?: string;
-  };
+  source?: 'mcp' | 'rag';
+  metadata?: Record<string, any>;
 }
 
 export const useCBHPMChat = () => {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([
     {
       id: '1',
-      content: '🏥 Olá! Sou seu assistente especializado em procedimentos médicos CBHPM. Posso ajudá-lo com:\n\n• 📋 Consulta de códigos e procedimentos\n• 💰 Valores e portes de cirurgias\n• 🔍 Busca por especialidades\n• ⚕️ Informações sobre cobertura\n• 📊 Análise de contratos médicos\n\nComo posso ajudá-lo hoje?',
+      content: '🏥 Olá! Sou seu assistente especializado em análise hospitalar. Posso ajudá-lo com:\n\n• 📊 Análise de procedimentos\n• 💰 Economia com correções\n• 📋 Guias finalizadas\n• 🔍 Métricas de auditoria\n\nComo posso ajudá-lo hoje?',
       sender: 'ai',
       timestamp: new Date(),
-      type: 'text'
+      type: 'text',
+      source: 'mcp'
     }
   ]);
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const sendMessage = useCallback(async (message: string): Promise<CBHPMChatResponse | null> => {
+  const sendMessage = useCallback(async (message: string, userId?: string): Promise<ChatResponse | null> => {
     if (!message.trim()) return null;
 
     setIsLoading(true);
@@ -47,45 +44,24 @@ export const useCBHPMChat = () => {
 
       setChatHistory(prev => [...prev, userMessage]);
 
-      // Enviar para o RAG CBHPM
-      const response = await CBHPMRagService.chatQuery(message);
+      // Enviar para o orquestrador
+      const chatRequest: ChatRequest = {
+        question: message,
+        userId: userId,
+        conversationId: `conv_${Date.now()}`
+      };
 
-      // Determinar tipo de resposta baseado no conteúdo
-      const hasRelevantProcedures = response.relevant_procedures && response.relevant_procedures.length > 0;
-      const messageType = hasRelevantProcedures ? 'procedures' : 'text';
+      const response = await ChatService.sendMessage(chatRequest);
 
       // Criar resposta do sistema
-      let aiContent = response.answer;
-      
-      // Se há procedimentos relevantes, adicionar informações estruturadas
-      if (hasRelevantProcedures) {
-        aiContent += '\n\n📋 **Procedimentos Relacionados:**\n';
-        response.relevant_procedures.slice(0, 3).forEach((proc, index) => {
-          aiContent += `\n${index + 1}. **${proc.codigo}** - ${proc.procedimento}\n`;
-          aiContent += `   • Porte: ${proc.porte}\n`;
-          aiContent += `   • Valor: R$ ${proc.valor_final?.toFixed(2) || 'N/A'}\n`;
-          if (proc.similarity_score) {
-            aiContent += `   • Relevância: ${(proc.similarity_score * 100).toFixed(1)}%\n`;
-          }
-        });
-
-        if (response.relevant_procedures.length > 3) {
-          aiContent += `\n... e mais ${response.relevant_procedures.length - 3} procedimento(s) relacionado(s)`;
-        }
-      }
-
       const aiMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        content: aiContent,
+        content: response.answer,
         sender: 'ai',
         timestamp: new Date(),
-        type: messageType,
-        procedures: response.relevant_procedures,
-        metadata: {
-          total_found: response.total_found,
-          context: response.context,
-          query_type: hasRelevantProcedures ? 'procedure_search' : 'general_query'
-        }
+        type: 'text',
+        source: response.source,
+        metadata: response.metadata
       };
 
       setChatHistory(prev => [...prev, aiMessage]);
@@ -97,7 +73,7 @@ export const useCBHPMChat = () => {
       // Adicionar mensagem de erro
       const errorMessage: ChatMessage = {
         id: (Date.now() + 2).toString(),
-        content: '❌ Desculpe, ocorreu um erro ao processar sua consulta. Verifique sua conexão e tente novamente.\n\nSe o problema persistir, entre em contato com o suporte técnico.',
+        content: '❌ Desculpe, ocorreu um erro ao processar sua consulta. Verifique sua conexão e tente novamente.',
         sender: 'ai',
         timestamp: new Date(),
         type: 'error'
@@ -110,36 +86,15 @@ export const useCBHPMChat = () => {
     }
   }, []);
 
-  const searchProcedures = useCallback(async (
-    query: string, 
-    options?: { method?: 'semantic' | 'exact_match' | 'hybrid'; top_k?: number }
-  ) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await CBHPMRagService.searchProcedures(query, options);
-      return response;
-    } catch (err: any) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const searchByCode = useCallback(async (codigo: string) => {
-    return searchProcedures(codigo, { method: 'exact_match', top_k: 1 });
-  }, [searchProcedures]);
-
   const clearHistory = useCallback(() => {
     setChatHistory([
       {
         id: '1',
-        content: '🏥 Olá! Sou seu assistente especializado em procedimentos médicos CBHPM. Como posso ajudá-lo hoje?',
+        content: '🏥 Olá! Sou seu assistente especializado em análise hospitalar. Como posso ajudá-lo hoje?',
         sender: 'ai',
         timestamp: new Date(),
-        type: 'text'
+        type: 'text',
+        source: 'mcp'
       }
     ]);
     setError(null);
@@ -148,34 +103,34 @@ export const useCBHPMChat = () => {
   const getQuickSuggestions = useCallback(() => {
     return [
       {
-        text: 'Consulta cardiológica',
-        category: 'Consultas',
-        icon: '🫀'
+        text: 'Quais foram os procedimentos mais realizados?',
+        category: 'Procedimentos',
+        icon: '📊'
       },
       {
-        text: 'Cirurgia ortopédica',
-        category: 'Cirurgias',
-        icon: '🦴'
+        text: 'Quanto eu tive de saving com correções?',
+        category: 'Auditoria',
+        icon: '💰'
       },
       {
-        text: 'Exames de imagem',
-        category: 'Exames',
-        icon: '🔬'
+        text: 'Quantas guias foram finalizadas hoje?',
+        category: 'Guias',
+        icon: '📋'
       },
       {
-        text: 'Procedimentos porte 3A',
-        category: 'Portes',
+        text: 'Qual a taxa de aprovação das auditorias?',
+        category: 'Métricas',
+        icon: '✅'
+      },
+      {
+        text: 'Qual a utilização média da sala cirúrgica?',
+        category: 'Eficiência',
         icon: '⚕️'
       },
       {
-        text: 'Valores de anestesia',
-        category: 'Anestesia',
-        icon: '💉'
-      },
-      {
-        text: 'Códigos TUSS mais utilizados',
-        category: 'TUSS',
-        icon: '📋'
+        text: 'Quais os tipos de correções mais comuns?',
+        category: 'Análise',
+        icon: '🔍'
       }
     ];
   }, []);
@@ -185,8 +140,6 @@ export const useCBHPMChat = () => {
     isLoading,
     error,
     sendMessage,
-    searchProcedures,
-    searchByCode,
     clearHistory,
     getQuickSuggestions
   };

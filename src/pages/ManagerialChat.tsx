@@ -189,6 +189,11 @@ const ManagerialChat = () => {
                 minute: '2-digit' 
               })}
             </div>
+            {message.source && (
+              <Badge className={`text-xs mt-2 ${message.source === 'mcp' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
+                {message.source === 'mcp' ? '🔧 Análise' : '📚 Conhecimento'}
+              </Badge>
+            )}
           </div>
         </div>
       </div>
