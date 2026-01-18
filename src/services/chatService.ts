@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || 'http://localhost:3005';
+const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || 'https://lazarusapi.azure-api.net/chatai';
 
 export interface ChatResponse {
   answer: string;
