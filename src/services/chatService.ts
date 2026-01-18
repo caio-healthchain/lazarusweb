@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || 'https://lazarusapi.azure-api.net/chatai';
+const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || 'https://lazarusapi.azure-api.net/chatorchestrator';
 
 export interface ChatResponse {
   answer: string;
@@ -17,7 +17,7 @@ export const sendMessage = async (message: string, conversationId: string): Prom
     console.log(`[ChatService] Enviando mensagem para orquestrador: "${message}"`);
 
     const response = await axios.post(
-      `${ORCHESTRATOR_URL}/api/v1/chat`,
+      `${ORCHESTRATOR_URL}/chat`,
       {
         question: message,
         conversationId,
