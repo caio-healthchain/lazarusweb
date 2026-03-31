@@ -16,34 +16,71 @@ const MOCK_MODE = true; // Ativar/desativar modo mock
 export const setupMockInterceptor = (client: AxiosInstance) => {
   if (!MOCK_MODE) return;
 
+  // Interceptor de request - MOCKAR ANTES DE ENVIAR
+  client.interceptors.request.use((config) => {
+    // Se a URL contiver /api/, mockar a resposta
+    if (MOCK_MODE && config.url?.includes('/api/')) {
+      console.log('🎭 Mock Mode: Interceptando', config.method?.toUpperCase(), config.url);
+      
+      // Retornar resposta mockada diretamente
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const mockResponse = handleMockRequest(config);
+          mockResponse.then((response) => {
+            // Resolver com a resposta mockada
+            resolve(response as any);
+          });
+        }, 300); // Simular delay de rede
+      });
+    }
+    return config;
+  });
+
+  // Interceptor de response - fallback para erros
   client.interceptors.response.use(
     (response) => response,
     (error) => {
       const config = error.config;
       
-      // Se a requisição falhou e estamos em modo mock, retornar dados mockados
-      if (MOCK_MODE && error.response?.status >= 500) {
-        console.log('🎭 Mock Mode: Retornando dados mockados para', config.url);
+      // Se a requisição falhou, tentar mockar
+      if (MOCK_MODE && config) {
+        console.log('🎭 Mock Mode: Requisição falhou, retornando mock para', config.url);
         return handleMockRequest(config);
       }
 
       return Promise.reject(error);
     }
   );
-
-  // Interceptor de request para logar e potencialmente mockar
-  client.interceptors.request.use((config) => {
-    // Se a URL contiver /api/, podemos mockar
-    if (MOCK_MODE && config.url?.includes('/api/')) {
-      console.log('🎭 Mock Mode interceptado:', config.method?.toUpperCase(), config.url);
-    }
-    return config;
-  });
 };
 
 const handleMockRequest = (config: any): Promise<AxiosResponse<any>> => {
   const url = config.url || '';
   const method = config.method?.toUpperCase() || 'GET';
+
+  console.log(`🎭 Mock: ${method} ${url}`);
+
+  // Hospitais - PRIORIDADE ALTA
+  if (url.includes('/hospitals') && method === 'GET') {
+    console.log('🎭 Retornando MOCK_HOSPITALS:', MOCK_HOSPITALS.length, 'hospitais');
+    return Promise.resolve({
+      status: 200,
+      data: MOCK_HOSPITALS,
+      statusText: 'OK',
+      headers: {},
+      config,
+    });
+  }
+
+  // Select hospital
+  if (url.includes('/select-hospital') && method === 'POST') {
+    return Promise.resolve({
+      status: 200,
+      data: { success: true, message: 'Hospital selecionado com sucesso' },
+      statusText: 'OK',
+      headers: {},
+      config,
+    });
+  }
 
   // Guias
   if (url.includes('/guias') && method === 'GET') {
@@ -139,28 +176,6 @@ const handleMockRequest = (config: any): Promise<AxiosResponse<any>> => {
     });
   }
 
-  // Hospitais
-  if (url.includes('/hospitals') && method === 'GET') {
-    return Promise.resolve({
-      status: 200,
-      data: MOCK_HOSPITALS,
-      statusText: 'OK',
-      headers: {},
-      config,
-    });
-  }
-
-  // Select hospital
-  if (url.includes('/select-hospital') && method === 'POST') {
-    return Promise.resolve({
-      status: 200,
-      data: { success: true, message: 'Hospital selecionado com sucesso' },
-      statusText: 'OK',
-      headers: {},
-      config,
-    });
-  }
-
   // Health check
   if (url.includes('/health')) {
     return Promise.resolve({
@@ -173,6 +188,7 @@ const handleMockRequest = (config: any): Promise<AxiosResponse<any>> => {
   }
 
   // Default: retornar sucesso genérico
+  console.log('🎭 Retornando resposta padrão para:', url);
   return Promise.resolve({
     status: 200,
     data: { success: true, data: [] },
