@@ -238,3 +238,65 @@ export const MOCK_CHAT_RESPONSES = {
 
 Como posso ajudá-lo?`
 };
+
+// Hospitais com perfis
+export interface Profile {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+}
+
+export interface HospitalWithProfiles {
+  id: string;
+  code: string;
+  name: string;
+  subdomain: string;
+  customDomain?: string;
+  logoUrl?: string;
+  primaryColor?: string;
+  profiles: Profile[];
+}
+
+export const MOCK_HOSPITALS: HospitalWithProfiles[] = [
+  {
+    id: 'hospital-sagrada-familia',
+    code: 'hsf',
+    name: 'Hospital Sagrada Família',
+    subdomain: 'sagrada-familia',
+    customDomain: 'lazarus.healthchainsolutions.com.br',
+    logoUrl: 'https://via.placeholder.com/200x100?text=Sagrada+Familia',
+    primaryColor: '#10B981',
+    profiles: [
+      {
+        id: 'profile-auditor',
+        code: 'auditor',
+        name: 'Auditor',
+        description: 'Responsável pela auditoria de guias e procedimentos',
+      },
+      {
+        id: 'profile-analista',
+        code: 'analista',
+        name: 'Analista',
+        description: 'Responsável pela análise de documentação',
+      },
+      {
+        id: 'profile-gerencial',
+        code: 'gerencial',
+        name: 'Gerencial',
+        description: 'Acesso ao dashboard executivo',
+      },
+    ],
+  },
+];
+
+export const MOCK_CONTRACTS = [
+  {
+    id: 'contract-001',
+    operadora: 'Operadora XYZ',
+    dataInicio: '2026-01-01',
+    dataFim: '2026-12-31',
+    status: 'ATIVO',
+    procedimentos: 150,
+  },
+];

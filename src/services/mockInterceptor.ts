@@ -8,6 +8,7 @@ import {
   MOCK_AUDIT_LOGS,
   MOCK_DASHBOARD_METRICS,
   MOCK_HOSPITAL,
+  MOCK_HOSPITALS,
 } from './mockData';
 
 const MOCK_MODE = true; // Ativar/desativar modo mock
@@ -132,6 +133,28 @@ const handleMockRequest = (config: any): Promise<AxiosResponse<any>> => {
     return Promise.resolve({
       status: 200,
       data: { success: true, message: 'Operação realizada com sucesso' },
+      statusText: 'OK',
+      headers: {},
+      config,
+    });
+  }
+
+  // Hospitais
+  if (url.includes('/hospitals') && method === 'GET') {
+    return Promise.resolve({
+      status: 200,
+      data: MOCK_HOSPITALS,
+      statusText: 'OK',
+      headers: {},
+      config,
+    });
+  }
+
+  // Select hospital
+  if (url.includes('/select-hospital') && method === 'POST') {
+    return Promise.resolve({
+      status: 200,
+      data: { success: true, message: 'Hospital selecionado com sucesso' },
       statusText: 'OK',
       headers: {},
       config,
