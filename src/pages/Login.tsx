@@ -242,9 +242,9 @@ const Login = () => {
                   </Alert>
                 )}
 
-                {/* Azure AD Login */}
+                {/* Azure AD Login - BYPASS PARA DEMO */}
                 <Button
-                  onClick={handleAzureLogin}
+                  onClick={handleDemoLogin}
                   disabled={isLoading}
                   className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-0 h-12 text-base font-medium"
                   size="lg"
@@ -254,7 +254,7 @@ const Login = () => {
                   ) : (
                     <Shield className="mr-3 h-5 w-5" />
                   )}
-                  Entrar com Azure AD
+                  Entrar na Plataforma
                 </Button>
 
                 {/* Demo Access - Desabilitado */}

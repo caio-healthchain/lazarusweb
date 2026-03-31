@@ -1,54 +1,63 @@
+// Chat Service com Mock
 import axios from 'axios';
+import { MOCK_CHAT_RESPONSES, MOCK_DASHBOARD_METRICS } from './mockData';
 
-const ORCHESTRATOR_URL = import.meta.env.VITE_ORCHESTRATOR_URL || 'https://lazarusapi.azure-api.net/chatorchestrator';
-
-export interface ChatResponse {
-  answer: string;
-  source: 'mcp' | 'rag' | 'hybrid';
-  confidence: number;
-  metadata?: {
-    toolsUsed?: string[];
-    dataRetrieved?: any;
-  };
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
 }
 
-export const sendMessage = async (message: string, conversationId: string): Promise<ChatResponse> => {
-  try {
-    console.log(`[ChatService] Enviando mensagem para orquestrador: "${message}"`);
-
-    const response = await axios.post(
-      `${ORCHESTRATOR_URL}/chat`,
-      {
-        question: message,
-        conversationId,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    console.log('[ChatService] Resposta do orquestrador:', response.data);
-
-    if (response.data.success && response.data.data) {
-      return response.data.data;
-    } else {
-      throw new Error(response.data.error || 'Erro desconhecido no orquestrador');
-    }
-
-  } catch (error: any) {
-    console.error('[ChatService] Erro ao enviar mensagem:', error);
-    
-    // Tratamento de erro melhorado
-    if (error.response?.data?.error) {
-      throw new Error(error.response.data.error);
-    } else if (error.response?.status === 400) {
-      throw new Error('Requisição inválida. Verifique o formato da pergunta.');
-    } else if (error.response?.status === 500) {
-      throw new Error('Erro no servidor do orquestrador. Tente novamente.');
-    } else {
-      throw new Error(error.message || 'Erro ao conectar com o orquestrador');
+// Função para encontrar a melhor resposta mockada
+const findMockResponse = (message: string): string => {
+  const lowerMessage = message.toLowerCase();
+  
+  // Procurar por palavras-chave
+  for (const [key, response] of Object.entries(MOCK_CHAT_RESPONSES)) {
+    if (key !== 'default' && lowerMessage.includes(key)) {
+      return response;
     }
   }
+  
+  // Se não encontrar, retornar resposta padrão
+  return MOCK_CHAT_RESPONSES.default;
 };
+
+export const chatService = {
+  // Enviar mensagem e receber resposta
+  sendMessage: async (message: string): Promise<string> => {
+    console.log('💬 Chat Mock - Mensagem do usuário:', message);
+    
+    // Simular delay de processamento
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const response = findMockResponse(message);
+    console.log('💬 Chat Mock - Resposta:', response);
+    
+    return response;
+  },
+
+  // Obter histórico de conversas (mock)
+  getConversationHistory: async (): Promise<ChatMessage[]> => {
+    return [
+      {
+        id: '1',
+        role: 'assistant',
+        content: MOCK_CHAT_RESPONSES.default,
+        timestamp: new Date(Date.now() - 5 * 60000),
+      },
+    ];
+  },
+
+  // Obter informações do sistema para o chat
+  getSystemInfo: () => {
+    return {
+      hospital: 'Hospital Sagrada Família',
+      metrics: MOCK_DASHBOARD_METRICS,
+      timestamp: new Date().toISOString(),
+    };
+  },
+};
+
+export default chatService;

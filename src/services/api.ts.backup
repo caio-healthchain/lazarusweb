@@ -1,7 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { API_CONFIG } from '@/config/auth';
 import { useAuthStore } from '@/store/authStore';
-import { setupMockInterceptor } from './mockInterceptor';
 
 // Tipos base
 export interface ApiResponse<T> {
@@ -185,9 +184,6 @@ const createApiClient = (): AxiosInstance => {
 };
 
 const apiClient = createApiClient();
-
-// Ativar mock interceptor para modo demo
-setupMockInterceptor(apiClient);
 
 // Serviços específicos
 export const patientsService = {
