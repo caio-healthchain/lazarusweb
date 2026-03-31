@@ -60,7 +60,7 @@ const handleMockRequest = (config: any): Promise<AxiosResponse<any>> => {
   console.log(`🎭 Mock: ${method} ${url}`);
 
   // Hospitais - PRIORIDADE ALTA
-  if (url.includes('/hospitals') && method === 'GET') {
+  if ((url.includes('/hospitals') || url.includes('/me/hospitals')) && method === 'GET') {
     console.log('🎭 Retornando MOCK_HOSPITALS:', MOCK_HOSPITALS.length, 'hospitais');
     return Promise.resolve({
       status: 200,
