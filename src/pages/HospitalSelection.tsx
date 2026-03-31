@@ -35,10 +35,28 @@ interface HospitalWithProfiles {
   profiles: Profile[];
 }
 
+// DADOS MOCKADOS PARA DEMO
+const MOCK_HOSPITALS: HospitalWithProfiles[] = [
+  {
+    id: 'hospital-sagrada-familia',
+    code: 'hsf',
+    name: 'Hospital Sagrada Familia',
+    subdomain: 'sagrada-familia',
+    customDomain: 'lazarus.healthchainsolutions.com.br',
+    logoUrl: 'https://via.placeholder.com/200x100?text=Sagrada+Familia',
+    primaryColor: '#10B981',
+    profiles: [
+      { id: 'profile-auditor', code: 'auditor', name: 'Auditor', description: 'Auditoria de guias' },
+      { id: 'profile-analista', code: 'analista', name: 'Analista', description: 'Analise de documentacao' },
+      { id: 'profile-gerencial', code: 'gerencial', name: 'Gerencial', description: 'Dashboard executivo' },
+    ],
+  },
+];
+
 const HospitalSelection = () => {
   const navigate = useNavigate();
   const { user, accessToken, logout } = useAuthStore();
-  const [hospitals, setHospitals] = useState<HospitalWithProfiles[]>([]);
+  const [hospitals, setHospitals] = useState<HospitalWithProfiles[]>(MOCK_HOSPITALS);
   const [loading, setLoading] = useState(true);
   const [selecting, setSelecting] = useState<string | null>(null);
 
@@ -62,23 +80,7 @@ const HospitalSelection = () => {
       
       // FALLBACK PARA DEMO: Se falhar, usar dados mockados
       console.log('Demo Mode: Usando dados mockados de hospitais');
-      const mockHospitals: HospitalWithProfiles[] = [
-        {
-          id: 'hospital-sagrada-familia',
-          code: 'hsf',
-          name: 'Hospital Sagrada Familia',
-          subdomain: 'sagrada-familia',
-          customDomain: 'lazarus.healthchainsolutions.com.br',
-          logoUrl: 'https://via.placeholder.com/200x100?text=Sagrada+Familia',
-          primaryColor: '#10B981',
-          profiles: [
-            { id: 'profile-auditor', code: 'auditor', name: 'Auditor', description: 'Auditoria de guias' },
-            { id: 'profile-analista', code: 'analista', name: 'Analista', description: 'Analise de documentacao' },
-            { id: 'profile-gerencial', code: 'gerencial', name: 'Gerencial', description: 'Dashboard executivo' },
-          ],
-        },
-      ];
-      setHospitals(mockHospitals);
+      setHospitals(MOCK_HOSPITALS);
       
       // Se erro de autenticacao, fazer logout
       if (error.response?.status === 401) {
@@ -98,6 +100,10 @@ const HospitalSelection = () => {
         color: '#3B82F6', // Azul
       },
       hsl: {
+        icon: <Hospital className="h-8 w-8 text-white" />,
+        color: '#10B981', // Verde
+      },
+      hsf: {
         icon: <Hospital className="h-8 w-8 text-white" />,
         color: '#10B981', // Verde
       },
@@ -190,145 +196,85 @@ const HospitalSelection = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
-      </div>
-
-      <div className="relative z-10 min-h-screen flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-white/5 backdrop-blur-sm border-b border-white/10 px-6 py-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-blue-600 to-emerald-600 rounded-lg">
-                <Hospital className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-semibold text-white">Lazarus</h1>
-                <p className="text-xs text-blue-200">HealthChain Solutions</p>
-              </div>
-            </div>
+        <div className="flex items-center justify-between mb-12">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">Selecione um Hospital</h1>
+            <p className="text-blue-200">Escolha o hospital para acessar a plataforma</p>
+          </div>
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className="bg-white/5 border-white/20 text-white hover:bg-white/10"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </div>
 
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm font-medium text-white">{user?.name}</p>
-                <p className="text-xs text-blue-200">{user?.email}</p>
-              </div>
-              <Button
-                onClick={handleLogout}
-                variant="ghost"
-                size="sm"
-                className="text-white hover:bg-white/10"
+        {/* Hospitals Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {hospitals.map((hospital) => {
+            const { icon, color } = getHospitalIcon(hospital.code);
+            return (
+              <Card
+                key={hospital.id}
+                className="backdrop-blur-xl bg-white/10 border-white/20 hover:border-white/40 transition-all cursor-pointer overflow-hidden group"
               >
-                <LogOut className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
+                <CardHeader>
+                  <div
+                    className="w-16 h-16 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+                    style={{ backgroundColor: color + '20', borderColor: color, borderWidth: '2px' }}
+                  >
+                    {icon}
+                  </div>
+                  <CardTitle className="text-xl text-white">{hospital.name}</CardTitle>
+                  <CardDescription className="text-blue-200">
+                    {hospital.profiles.length} módulos disponíveis
+                  </CardDescription>
+                </CardHeader>
 
-        {/* Main Content */}
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="max-w-6xl w-full">
-            <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-600 to-emerald-600 rounded-full mb-6">
-                <Shield className="h-10 w-10 text-white" />
-              </div>
-              <h1 className="text-4xl font-bold text-white mb-4">
-                Selecione o Hospital
-              </h1>
-              <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-                Escolha o hospital que deseja acessar para continuar
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {hospitals.map((hospital) => (
-                <Card
-                  key={hospital.id}
-                  className="backdrop-blur-xl bg-white/10 border-white/20 hover:bg-white/15 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl cursor-pointer"
-                  onClick={() => !selecting && handleSelectHospital(hospital)}
-                >
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start justify-between mb-4">
-                      <div
-                        className="flex items-center justify-center w-16 h-16 rounded-xl"
-                        style={{
-                          backgroundColor: hospital.logoUrl 
-                            ? (hospital.primaryColor || '#3B82F6')
-                            : getHospitalIcon(hospital.code).color,
-                          opacity: 0.9,
-                        }}
-                      >
-                        {hospital.logoUrl ? (
-                          <img
-                            src={hospital.logoUrl}
-                            alt={hospital.name}
-                            className="w-12 h-12 object-contain"
-                          />
-                        ) : (
-                          getHospitalIcon(hospital.code).icon
-                        )}
-                      </div>
-                      <Badge className="bg-emerald-500/20 text-emerald-200 border-emerald-500/30">
-                        Ativo
-                      </Badge>
+                <CardContent className="space-y-4">
+                  {/* Perfis */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-blue-300 uppercase">Módulos</p>
+                    <div className="flex flex-wrap gap-2">
+                      {hospital.profiles.map((profile) => (
+                        <Badge
+                          key={profile.id}
+                          variant="outline"
+                          className="bg-white/10 border-white/20 text-blue-200 hover:bg-white/20"
+                        >
+                          {profile.name}
+                        </Badge>
+                      ))}
                     </div>
+                  </div>
 
-                    <CardTitle className="text-xl font-bold text-white mb-2">
-                      {hospital.name}
-                    </CardTitle>
-                    <CardDescription className="text-blue-100">
-                      {hospital.profiles.length} perfil(is) disponível(is)
-                    </CardDescription>
-                  </CardHeader>
-
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex flex-wrap gap-2">
-                        {hospital.profiles.map((profile) => (
-                          <Badge
-                            key={profile.id}
-                            variant="outline"
-                            className="bg-blue-500/10 text-blue-200 border-blue-500/30"
-                          >
-                            {profile.name}
-                          </Badge>
-                        ))}
-                      </div>
-
-                      <Button
-                        disabled={selecting !== null}
-                        className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-0"
-                      >
-                        {selecting === hospital.id ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Acessando...
-                          </>
-                        ) : (
-                          <>
-                            Acessar
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="bg-white/5 backdrop-blur-sm border-t border-white/10 px-6 py-4">
-          <div className="max-w-7xl mx-auto text-center">
-            <p className="text-sm text-blue-200">
-              © 2024 HealthChain Solutions • Plataforma Segura com Azure AD SSO
-            </p>
-          </div>
+                  {/* Botão de Acesso */}
+                  <Button
+                    onClick={() => handleSelectHospital(hospital)}
+                    disabled={selecting === hospital.id}
+                    className="w-full bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-700 hover:to-emerald-700 text-white mt-4"
+                  >
+                    {selecting === hospital.id ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Acessando...
+                      </>
+                    ) : (
+                      <>
+                        Acessar
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>
