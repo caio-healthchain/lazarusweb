@@ -4,8 +4,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  ArrowLeft, Search, Stethoscope, Clock, FileText, AlertTriangle
+  Search, Stethoscope, Clock, FileText, AlertTriangle
 } from 'lucide-react';
+import AICopilotTip from '@/components/ai/AICopilotTip';
 import AccountCard from '@/components/workflow/AccountCard';
 import { mockAccounts } from '@/data/workflowMockData';
 
@@ -44,9 +45,6 @@ const FrenteMedica = () => {
       <div className="bg-white border-b px-6 py-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/modules')}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> Módulos
-            </Button>
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 bg-emerald-600 rounded-lg">
                 <Stethoscope className="h-5 w-5 text-white" />
@@ -61,6 +59,16 @@ const FrenteMedica = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="mb-4">
+          <AICopilotTip
+            variant="info"
+            title="Parecer médico necessário"
+            message={`${procsPendentes} procedimentos aguardam parecer médico. A IA sugere priorizar a conta com Artroplastia Total de Joelho (valor mais alto em workflow).`}
+            action="Ver procedimentos prioritários"
+            onAction={() => setStatusFilter('pendente')}
+          />
+        </div>
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card className="border-l-4 border-l-emerald-500">
             <CardContent className="p-4">

@@ -139,7 +139,7 @@ const HospitalSelection = () => {
 
       // Temporariamente, redirecionar todos para a mesma URL
       // TODO: Implementar subdomínios quando os hospitais estiverem configurados
-      window.location.href = 'https://lazarus.healthchainsolutions.com.br/modules';
+      window.location.href = '/central-contas';
     } catch (error: any) {
       console.error('Erro ao selecionar hospital:', error);
       
@@ -147,7 +147,7 @@ const HospitalSelection = () => {
       console.log('Demo Mode: Redirecionando mesmo com erro');
       toast.success(`Acessando ${hospital.name}...`);
       setTimeout(() => {
-        window.location.href = 'https://lazarus.healthchainsolutions.com.br/modules';
+        window.location.href = '/central-contas';
       }, 1000);
       setSelecting(null);
     }

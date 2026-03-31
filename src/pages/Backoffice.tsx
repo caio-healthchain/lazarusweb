@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import {
-  ArrowLeft, Search, Building2, FileText, Package, DollarSign,
+  Search, Building2, FileText, Package, DollarSign,
   Calendar, Phone, Mail, MapPin, Star, TrendingUp, AlertTriangle,
   Settings, Truck
 } from 'lucide-react';
+import AICopilotTip from '@/components/ai/AICopilotTip';
 import { mockSuppliers } from '@/data/workflowMockData';
 
 const formatCurrency = (value: number) => {
@@ -151,9 +152,6 @@ const Backoffice = () => {
       <div className="bg-white border-b px-6 py-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/modules')}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> Módulos
-            </Button>
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 bg-gray-800 rounded-lg">
                 <Settings className="h-5 w-5 text-white" />
@@ -168,6 +166,16 @@ const Backoffice = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="mb-4">
+          <AICopilotTip
+            variant="insight"
+            title="Contrato Amil vencendo em 90 dias"
+            message="O contrato CTR-004 (Amil Corporativo) vence em dez/2025. A taxa de glosa da Amil (8.5%) é a mais alta. Recomendo renegociar com foco na redução de glosas e prazo de pagamento."
+            action="Ver contrato"
+            onAction={() => {}}
+          />
+        </div>
+
         <Tabs defaultValue="contratos" className="space-y-4">
           <TabsList className="bg-white border">
             <TabsTrigger value="contratos">Contratos ({mockContratos.length})</TabsTrigger>

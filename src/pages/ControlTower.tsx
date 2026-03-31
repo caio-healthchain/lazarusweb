@@ -5,9 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  ArrowLeft, Search, Eye, DollarSign, Clock, AlertTriangle,
+  Search, Eye, DollarSign, Clock, AlertTriangle,
   CheckCircle, ArrowRight, User, Building2, Layers
 } from 'lucide-react';
+import AICopilotTip from '@/components/ai/AICopilotTip';
 import {
   mockAccounts, getAccountsByPhase, getWorkflowMetrics,
   getStatusColor, getStatusLabel, getPrioridadeColor, WorkflowAccount
@@ -121,15 +122,12 @@ const ControlTower = () => {
         <div className="max-w-full mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/modules')}>
-                <ArrowLeft className="h-4 w-4 mr-1" /> Módulos
-              </Button>
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg">
                   <Layers className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">Control Tower</h1>
+                  <h1 className="text-xl font-bold text-gray-900">Central de Contas</h1>
                   <p className="text-sm text-gray-500">Visão completa do workflow de contas hospitalares</p>
                 </div>
               </div>
@@ -148,6 +146,17 @@ const ControlTower = () => {
       </div>
 
       <div className="px-6 py-4">
+        {/* IA Copilot Tip */}
+        <div className="mb-4">
+          <AICopilotTip
+            variant="insight"
+            title="Atenção: 2 contas com SLA crítico"
+            message="As contas CT-2026-002 (Enfermagem) e CT-2026-004 (Auditoria Final) estão com SLA abaixo de 24h. Recomendo priorizar para evitar atraso no faturamento."
+            action="Ver contas urgentes"
+            onAction={() => {}}
+          />
+        </div>
+
         {/* Métricas Resumo */}
         <div className="grid grid-cols-2 md:grid-cols-7 gap-3 mb-6">
           <Card className="p-3">

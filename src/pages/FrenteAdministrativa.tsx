@@ -5,9 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  ArrowLeft, Search, FileCheck, Clock, AlertTriangle,
+  Search, FileCheck, Clock, AlertTriangle,
   ClipboardCheck, FileText, DollarSign, Filter
 } from 'lucide-react';
+import AICopilotTip from '@/components/ai/AICopilotTip';
 import AccountCard from '@/components/workflow/AccountCard';
 import { mockAccounts, WorkflowAccount } from '@/data/workflowMockData';
 
@@ -48,9 +49,6 @@ const FrenteAdministrativa = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" onClick={() => navigate('/modules')}>
-                <ArrowLeft className="h-4 w-4 mr-1" /> Módulos
-              </Button>
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 bg-purple-600 rounded-lg">
                   <ClipboardCheck className="h-5 w-5 text-white" />
@@ -66,6 +64,17 @@ const FrenteAdministrativa = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* IA Copilot */}
+        <div className="mb-4">
+          <AICopilotTip
+            variant="warning"
+            title="{docsPendentes} documentos obrigatórios pendentes"
+            message="Existem documentos obrigatórios faltando nas contas desta frente. Recomendo priorizar a conta CT-2026-001 que está há mais de 24h aguardando."
+            action="Ver documentos pendentes"
+            onAction={() => setStatusFilter('pendente')}
+          />
+        </div>
+
         {/* Métricas */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card className="border-l-4 border-l-purple-500">

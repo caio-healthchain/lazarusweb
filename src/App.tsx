@@ -11,7 +11,6 @@ import { useTokenRenewal } from "@/hooks/useTokenRenewal";
 // Pages - Original
 import Login from "./pages/Login";
 import HospitalSelection from "./pages/HospitalSelection";
-import ModuleSelection from "./pages/ModuleSelection";
 import ManagerialDashboard from "./pages/ManagerialDashboard";
 import ManagerialChat from "./pages/ManagerialChat";
 import NewAudit from "./pages/NewAudit";
@@ -38,7 +37,7 @@ import Backoffice from "./pages/Backoffice";
 
 // Components
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import Header from "./components/layout/Header";
+import AppLayout from "./components/layout/AppLayout";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,238 +51,139 @@ const queryClient = new QueryClient({
 
 const msalInstance = new PublicClientApplication(msalConfig);
 
+// Wrapper para rotas com sidebar
+const WithLayout = ({ children }: { children: React.ReactNode }) => (
+  <ProtectedRoute>
+    <AppLayout>{children}</AppLayout>
+  </ProtectedRoute>
+);
+
 const AppContent = () => {
   useTokenRenewal();
   
   return (
     <BrowserRouter>
-          <Routes>
-            {/* Rota p\u00fablica de login */}
-            <Route path="/login" element={<Login />} />
-            
-            {/* Sele\u00e7\u00e3o de hospital */}
-            <Route path="/select-hospital" element={
-              <ProtectedRoute>
-                <HospitalSelection />
-              </ProtectedRoute>
-            } />
-            
-            {/* Sele\u00e7\u00e3o de m\u00f3dulos */}
-            <Route path="/modules" element={
-              <ProtectedRoute>
-                <ModuleSelection />
-              </ProtectedRoute>
-            } />
+      <Routes>
+        {/* Rotas públicas */}
+        <Route path="/login" element={<Login />} />
+        
+        {/* Seleção de hospital (sem sidebar - tela de transição) */}
+        <Route path="/select-hospital" element={
+          <ProtectedRoute>
+            <HospitalSelection />
+          </ProtectedRoute>
+        } />
 
-            {/* ==================== */}
-            {/* WORKFLOW - Novas Rotas */}
-            {/* ==================== */}
+        {/* ==================== */}
+        {/* WORKFLOW DE CONTAS */}
+        {/* ==================== */}
 
-            {/* Control Tower - Kanban de Contas */}
-            <Route path="/control-tower" element={
-              <ProtectedRoute>
-                <ControlTower />
-              </ProtectedRoute>
-            } />
+        {/* Central de Contas (Home após login) */}
+        <Route path="/central-contas" element={
+          <WithLayout><ControlTower /></WithLayout>
+        } />
+        {/* Manter rota antiga para compatibilidade */}
+        <Route path="/control-tower" element={<Navigate to="/central-contas" replace />} />
 
-            {/* Frente Administrativa */}
-            <Route path="/frente-administrativa" element={
-              <ProtectedRoute>
-                <FrenteAdministrativa />
-              </ProtectedRoute>
-            } />
-            <Route path="/frente-administrativa/:id" element={
-              <ProtectedRoute>
-                <FrenteAdministrativaDetails />
-              </ProtectedRoute>
-            } />
+        {/* Frente Administrativa */}
+        <Route path="/frente-administrativa" element={
+          <WithLayout><FrenteAdministrativa /></WithLayout>
+        } />
+        <Route path="/frente-administrativa/:id" element={
+          <WithLayout><FrenteAdministrativaDetails /></WithLayout>
+        } />
 
-            {/* Frente de Enfermagem */}
-            <Route path="/frente-enfermagem" element={
-              <ProtectedRoute>
-                <FrenteEnfermagem />
-              </ProtectedRoute>
-            } />
-            <Route path="/frente-enfermagem/:id" element={
-              <ProtectedRoute>
-                <FrenteEnfermagemDetails />
-              </ProtectedRoute>
-            } />
+        {/* Frente de Enfermagem */}
+        <Route path="/frente-enfermagem" element={
+          <WithLayout><FrenteEnfermagem /></WithLayout>
+        } />
+        <Route path="/frente-enfermagem/:id" element={
+          <WithLayout><FrenteEnfermagemDetails /></WithLayout>
+        } />
 
-            {/* Frente M\u00e9dica */}
-            <Route path="/frente-medica" element={
-              <ProtectedRoute>
-                <FrenteMedica />
-              </ProtectedRoute>
-            } />
-            <Route path="/frente-medica/:id" element={
-              <ProtectedRoute>
-                <FrenteMedicaDetails />
-              </ProtectedRoute>
-            } />
+        {/* Frente Médica */}
+        <Route path="/frente-medica" element={
+          <WithLayout><FrenteMedica /></WithLayout>
+        } />
+        <Route path="/frente-medica/:id" element={
+          <WithLayout><FrenteMedicaDetails /></WithLayout>
+        } />
 
-            {/* Glosas e Laudos */}
-            <Route path="/glosas" element={
-              <ProtectedRoute>
-                <Glosas />
-              </ProtectedRoute>
-            } />
-            <Route path="/glosas/:id" element={
-              <ProtectedRoute>
-                <GlosaDetails />
-              </ProtectedRoute>
-            } />
+        {/* Glosas e Recursos */}
+        <Route path="/glosas" element={
+          <WithLayout><Glosas /></WithLayout>
+        } />
+        <Route path="/glosas/:id" element={
+          <WithLayout><GlosaDetails /></WithLayout>
+        } />
 
-            {/* Backoffice */}
-            <Route path="/backoffice" element={
-              <ProtectedRoute>
-                <Backoffice />
-              </ProtectedRoute>
-            } />
+        {/* ==================== */}
+        {/* GESTÃO E INTELIGÊNCIA */}
+        {/* ==================== */}
 
-            {/* ==================== */}
-            {/* M\u00f3dulos Originais */}
-            {/* ==================== */}
-            
-            {/* M\u00f3dulo Gerencial */}
-            <Route path="/gerencial" element={
-              <ProtectedRoute>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <ManagerialDashboard />
-                </div>
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/gerencial/chat" element={
-              <ProtectedRoute>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <ManagerialChat />
-                </div>
-              </ProtectedRoute>
-            } />
-            
-            {/* M\u00f3dulo Analista */}
-            <Route path="/analista" element={
-              <ProtectedRoute>
-                <Analista />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/analista/:guideId" element={
-              <ProtectedRoute>
-                <AnalistaDetails />
-              </ProtectedRoute>
-            } />
-            
-            {/* Rota raiz */}
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            
-            <Route path="/audit/new" element={
-              <ProtectedRoute>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <NewAudit />
-                </div>
-              </ProtectedRoute>
-            } />
+        {/* Backoffice */}
+        <Route path="/backoffice" element={
+          <WithLayout><Backoffice /></WithLayout>
+        } />
 
-            <Route path="/audits" element={
-              <ProtectedRoute>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <Audits />
-                </div>
-              </ProtectedRoute>
-            } />
+        {/* Painel Gerencial */}
+        <Route path="/gerencial" element={
+          <WithLayout><ManagerialDashboard /></WithLayout>
+        } />
+        
+        {/* Assistente IA */}
+        <Route path="/gerencial/chat" element={
+          <WithLayout><ManagerialChat /></WithLayout>
+        } />
 
-            <Route path="/guia/:id" element={
-              <ProtectedRoute>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <GuiaDetails />
-                </div>
-              </ProtectedRoute>
-            } />
+        {/* ==================== */}
+        {/* AUDITORIA DETALHADA */}
+        {/* ==================== */}
 
-            <Route path="/contracts" element={
-              <ProtectedRoute>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <Contracts />
-                </div>
-              </ProtectedRoute>
-            } />
+        {/* Auditor */}
+        <Route path="/audits" element={
+          <WithLayout><Audits /></WithLayout>
+        } />
+        <Route path="/audit/new" element={
+          <WithLayout><NewAudit /></WithLayout>
+        } />
+        <Route path="/guia/:id" element={
+          <WithLayout><GuiaDetails /></WithLayout>
+        } />
 
-            <Route path="/tmi-report" element={
-              <ProtectedRoute>
-                <>
-                  <Header />
-                  <TMIReport />
-                </>
-              </ProtectedRoute>
-            } />
+        {/* Analista */}
+        <Route path="/analista" element={
+          <WithLayout><Analista /></WithLayout>
+        } />
+        <Route path="/analista/:guideId" element={
+          <WithLayout><AnalistaDetails /></WithLayout>
+        } />
 
-            <Route path="/contracts/:id" element={
-              <ProtectedRoute>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <ContractDetailsNew />
-                </div>
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/dashboard" element={
-              <ProtectedRoute requiredRoles={['admin', 'auditor']}>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <div className="p-8 text-center">
-                    <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
-                    <p className="text-gray-600">Dashboard administrativo em desenvolvimento</p>
-                  </div>
-                </div>
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/reports" element={
-              <ProtectedRoute requiredRoles={['admin', 'auditor']}>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <div className="p-8 text-center">
-                    <h2 className="text-2xl font-bold mb-4">Relat\u00f3rios</h2>
-                    <p className="text-gray-600">M\u00f3dulo de relat\u00f3rios em desenvolvimento</p>
-                  </div>
-                </div>
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/settings" element={
-              <ProtectedRoute requiredRoles={['admin']}>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <div className="p-8 text-center">
-                    <h2 className="text-2xl font-bold mb-4">Configura\u00e7\u00f5es</h2>
-                    <p className="text-gray-600">Configura\u00e7\u00f5es do sistema em desenvolvimento</p>
-                  </div>
-                </div>
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <div className="min-h-screen bg-background">
-                  <Header />
-                  <div className="p-8 text-center">
-                    <h2 className="text-2xl font-bold mb-4">Perfil</h2>
-                    <p className="text-gray-600">Perfil do usu\u00e1rio em desenvolvimento</p>
-                  </div>
-                </div>
-              </ProtectedRoute>
-            } />
+        {/* Contratos */}
+        <Route path="/contracts" element={
+          <WithLayout><Contracts /></WithLayout>
+        } />
+        <Route path="/contracts/:id" element={
+          <WithLayout><ContractDetailsNew /></WithLayout>
+        } />
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+        {/* TMI Report */}
+        <Route path="/tmi-report" element={
+          <WithLayout><TMIReport /></WithLayout>
+        } />
+
+        {/* Rota raiz - redireciona para Central de Contas */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        
+        {/* Rota antiga de módulos - redireciona para Central de Contas */}
+        <Route path="/modules" element={
+          <ProtectedRoute>
+            <Navigate to="/central-contas" replace />
+          </ProtectedRoute>
+        } />
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </BrowserRouter>
   );
 };

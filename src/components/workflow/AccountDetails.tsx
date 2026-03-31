@@ -33,6 +33,10 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
     mockAccounts.find(a => a.id === id)
   );
   const [observacao, setObservacao] = useState('');
+  const [showWizardAvancar, setShowWizardAvancar] = useState(false);
+  const [showWizardDevolver, setShowWizardDevolver] = useState(false);
+  const [wizardMotivo, setWizardMotivo] = useState('');
+  const [wizardComentario, setWizardComentario] = useState('');
 
   if (!account) {
     return (
@@ -46,12 +50,30 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
   }
 
   const handleAvancar = () => {
-    toast.success('Conta avançada para a próxima etapa do workflow!');
-    navigate(backPath);
+    setShowWizardAvancar(true);
   };
 
   const handleDevolver = () => {
+    setShowWizardDevolver(true);
+  };
+
+  const confirmarAvancar = () => {
+    toast.success('Conta avançada para a próxima etapa do workflow!');
+    setShowWizardAvancar(false);
+    setWizardMotivo('');
+    setWizardComentario('');
+    navigate(backPath);
+  };
+
+  const confirmarDevolver = () => {
+    if (!wizardMotivo) {
+      toast.error('Selecione um motivo para a devolução.');
+      return;
+    }
     toast.info('Conta devolvida para a etapa anterior com pendência.');
+    setShowWizardDevolver(false);
+    setWizardMotivo('');
+    setWizardComentario('');
     navigate(backPath);
   };
 
@@ -63,8 +85,108 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
 
   const config = frenteConfig[frente];
 
+  const motivosDevolver = [
+    'Documentação incompleta',
+    'Divergência de valores',
+    'Falta de autorização prévia',
+    'Erro de codificação TUSS',
+    'Falta de justificativa clínica',
+    'Material/medicamento sem nota fiscal',
+    'Outro'
+  ];
+
+  const proximaEtapa = frente === 'administrativa' ? 'Enfermagem' : frente === 'enfermagem' ? 'Médica' : 'Auditoria Final';
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Wizard Avançar */}
+      {showWizardAvancar && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-emerald-700">
+                <ArrowRight className="h-5 w-5" /> Avançar Conta
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                <p className="text-sm text-emerald-800">
+                  A conta <strong>{account?.id}</strong> será enviada para a <strong>Frente {proximaEtapa}</strong>.
+                </p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">Comentário (opcional)</label>
+                <Textarea
+                  placeholder="Adicione observações para a próxima frente..."
+                  value={wizardComentario}
+                  onChange={(e) => setWizardComentario(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setShowWizardAvancar(false)}>Cancelar</Button>
+                <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={confirmarAvancar}>
+                  Confirmar Avanço
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Wizard Devolver */}
+      {showWizardDevolver && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-orange-700">
+                <ArrowLeft className="h-5 w-5" /> Devolver Conta
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                <p className="text-sm text-orange-800">
+                  A conta <strong>{account?.id}</strong> será devolvida para a etapa anterior com pendência.
+                </p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">Motivo da devolução *</label>
+                <div className="space-y-2">
+                  {motivosDevolver.map(motivo => (
+                    <label key={motivo} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="motivo"
+                        value={motivo}
+                        checked={wizardMotivo === motivo}
+                        onChange={(e) => setWizardMotivo(e.target.value)}
+                        className="text-orange-600"
+                      />
+                      <span className="text-sm">{motivo}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1 block">Comentário *</label>
+                <Textarea
+                  placeholder="Descreva o motivo da devolução em detalhes..."
+                  value={wizardComentario}
+                  onChange={(e) => setWizardComentario(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setShowWizardDevolver(false)}>Cancelar</Button>
+                <Button className="bg-orange-600 hover:bg-orange-700 text-white" onClick={confirmarDevolver}>
+                  Confirmar Devolução
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b px-6 py-4">
         <div className="max-w-7xl mx-auto">

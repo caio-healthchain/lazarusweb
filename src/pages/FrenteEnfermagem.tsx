@@ -4,8 +4,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  ArrowLeft, Search, Package, Pill, Clock, AlertTriangle, Heart
+  Search, Package, Pill, Clock, AlertTriangle, Heart
 } from 'lucide-react';
+import AICopilotTip from '@/components/ai/AICopilotTip';
 import AccountCard from '@/components/workflow/AccountCard';
 import { mockAccounts } from '@/data/workflowMockData';
 
@@ -44,9 +45,6 @@ const FrenteEnfermagem = () => {
       <div className="bg-white border-b px-6 py-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/modules')}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> Módulos
-            </Button>
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg">
                 <Heart className="h-5 w-5 text-white" />
@@ -61,6 +59,16 @@ const FrenteEnfermagem = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="mb-4">
+          <AICopilotTip
+            variant="info"
+            title="Materiais e medicamentos para validar"
+            message={`Existem ${materiaisPendentes} materiais e ${medPendentes} medicamentos aguardando validação. A IA identificou que 2 itens podem ter valores acima da tabela contratual.`}
+            action="Ver itens com divergência"
+            onAction={() => {}}
+          />
+        </div>
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card className="border-l-4 border-l-blue-500">
             <CardContent className="p-4">

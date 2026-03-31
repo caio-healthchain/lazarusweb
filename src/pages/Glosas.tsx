@@ -5,8 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  ArrowLeft, Search, AlertTriangle, FileText, DollarSign, Clock, Scale
+  Search, AlertTriangle, FileText, DollarSign, Clock, Scale
 } from 'lucide-react';
+import AICopilotTip from '@/components/ai/AICopilotTip';
 import AccountCard from '@/components/workflow/AccountCard';
 import { mockAccounts } from '@/data/workflowMockData';
 
@@ -54,16 +55,13 @@ const Glosas = () => {
       <div className="bg-white border-b px-6 py-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/modules')}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> Módulos
-            </Button>
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 bg-red-600 rounded-lg">
                 <Scale className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Glosas e Laudos</h1>
-                <p className="text-sm text-gray-500">Gestão de glosas, recursos e geração de laudos</p>
+                <h1 className="text-xl font-bold text-gray-900">Glosas e Recursos</h1>
+                <p className="text-sm text-gray-500">Tratamento de glosas, contestações e geração de laudos</p>
               </div>
             </div>
           </div>
@@ -71,6 +69,16 @@ const Glosas = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="mb-4">
+          <AICopilotTip
+            variant="warning"
+            title="Glosa com prazo vencendo hoje"
+            message={`A conta CT-2026-007 (Amil) tem prazo de contestação vencendo hoje. Valor em risco: R$ 2.100,00. A IA recomenda contestar com base no Art. 12 da RN 395/2016.`}
+            action="Contestar agora"
+            onAction={() => navigate('/glosas/CT-2026-007')}
+          />
+        </div>
+
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           <Card className="border-l-4 border-l-red-500">
             <CardContent className="p-4">
