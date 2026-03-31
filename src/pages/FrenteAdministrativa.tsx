@@ -49,7 +49,7 @@ const FrenteAdministrativa = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={() => navigate('/modules')}>
-                <ArrowLeft className="h-4 w-4 mr-1" /> M\u00f3dulos
+                <ArrowLeft className="h-4 w-4 mr-1" /> Módulos
               </Button>
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 bg-purple-600 rounded-lg">
@@ -57,7 +57,7 @@ const FrenteAdministrativa = () => {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-gray-900">Frente Administrativa</h1>
-                  <p className="text-sm text-gray-500">Valida\u00e7\u00e3o de documenta\u00e7\u00e3o e elegibilidade</p>
+                  <p className="text-sm text-gray-500">Validação de documentação e elegibilidade</p>
                 </div>
               </div>
             </div>
@@ -66,7 +66,7 @@ const FrenteAdministrativa = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-6">
-        {/* M\u00e9tricas */}
+        {/* Métricas */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card className="border-l-4 border-l-purple-500">
             <CardContent className="p-4">
@@ -94,7 +94,7 @@ const FrenteAdministrativa = () => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-500">Em An\u00e1lise</p>
+                  <p className="text-sm text-gray-500">Em Análise</p>
                   <p className="text-2xl font-bold text-blue-600">{emAnalise}</p>
                 </div>
                 <FileText className="h-8 w-8 text-blue-300" />
@@ -133,7 +133,7 @@ const FrenteAdministrativa = () => {
               Pendentes ({pendentes})
             </Button>
             <Button variant={statusFilter === 'em_analise' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('em_analise')}>
-              Em An\u00e1lise ({emAnalise})
+              Em Análise ({emAnalise})
             </Button>
           </div>
         </div>

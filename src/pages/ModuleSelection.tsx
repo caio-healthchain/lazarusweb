@@ -27,14 +27,14 @@ const ModuleSelection = () => {
     {
       id: 'control-tower',
       title: 'Control Tower',
-      description: 'Vis\u00e3o completa do workflow de contas hospitalares em tempo real',
+      description: 'Visão completa do workflow de contas hospitalares em tempo real',
       icon: Layers,
       color: 'bg-gradient-to-r from-purple-600 to-blue-600',
       features: [
         'Kanban de contas por etapa',
         'SLA e prioridades',
-        'Rastreamento de respons\u00e1veis',
-        'M\u00e9tricas em tempo real'
+        'Rastreamento de responsáveis',
+        'Métricas em tempo real'
       ],
       route: '/control-tower',
       available: true,
@@ -43,13 +43,13 @@ const ModuleSelection = () => {
     {
       id: 'frente-administrativa',
       title: 'Frente Administrativa',
-      description: 'Valida\u00e7\u00e3o de documenta\u00e7\u00e3o, elegibilidade e autoriza\u00e7\u00f5es',
+      description: 'Validação de documentação, elegibilidade e autorizações',
       icon: ClipboardCheck,
       color: 'bg-purple-600',
       features: [
         'Checklist de documentos',
-        'Valida\u00e7\u00e3o de elegibilidade',
-        'Autoriza\u00e7\u00f5es pr\u00e9vias',
+        'Validação de elegibilidade',
+        'Autorizações prévias',
         'Auditoria administrativa'
       ],
       route: '/frente-administrativa',
@@ -59,12 +59,12 @@ const ModuleSelection = () => {
     {
       id: 'frente-enfermagem',
       title: 'Frente de Enfermagem',
-      description: 'Complemento da conta com materiais, medicamentos e prescri\u00e7\u00f5es',
+      description: 'Complemento da conta com materiais, medicamentos e prescrições',
       icon: Heart,
       color: 'bg-blue-600',
       features: [
-        'Valida\u00e7\u00e3o de materiais/OPME',
-        'Confer\u00eancia de medicamentos',
+        'Validação de materiais/OPME',
+        'Conferência de medicamentos',
         'Lotes e validades',
         'Auditoria de enfermagem'
       ],
@@ -74,15 +74,15 @@ const ModuleSelection = () => {
     },
     {
       id: 'frente-medica',
-      title: 'Frente M\u00e9dica',
-      description: 'Revis\u00e3o cl\u00ednica, justificativas e finaliza\u00e7\u00e3o da conta',
+      title: 'Frente Médica',
+      description: 'Revisão clínica, justificativas e finalização da conta',
       icon: Stethoscope,
       color: 'bg-emerald-600',
       features: [
-        'Revis\u00e3o de procedimentos',
-        'Justificativa cl\u00ednica',
+        'Revisão de procedimentos',
+        'Justificativa clínica',
         'Enquadramento de porte',
-        'Auditoria m\u00e9dica'
+        'Auditoria médica'
       ],
       route: '/frente-medica',
       available: true,
@@ -91,13 +91,13 @@ const ModuleSelection = () => {
     {
       id: 'glosas',
       title: 'Glosas e Laudos',
-      description: 'Gest\u00e3o de glosas, aceite, recurso e gera\u00e7\u00e3o de laudos',
+      description: 'Gestão de glosas, aceite, recurso e geração de laudos',
       icon: Scale,
       color: 'bg-red-600',
       features: [
         'Aceite ou recurso de glosas',
-        'Justificativa cl\u00ednica',
-        'Gera\u00e7\u00e3o de laudos',
+        'Justificativa clínica',
+        'Geração de laudos',
         'Acompanhamento de recursos'
       ],
       route: '/glosas',
@@ -107,14 +107,14 @@ const ModuleSelection = () => {
     {
       id: 'backoffice',
       title: 'Backoffice',
-      description: 'Gest\u00e3o de contratos, fornecedores e recomenda\u00e7\u00f5es inteligentes',
+      description: 'Gestão de contratos, fornecedores e recomendações inteligentes',
       icon: Settings,
       color: 'bg-gray-800',
       features: [
-        'Gest\u00e3o de contratos',
+        'Gestão de contratos',
         'Mapeamento de fornecedores',
-        'Recomenda\u00e7\u00e3o de operadoras',
-        'An\u00e1lise de custos'
+        'Recomendação de operadoras',
+        'Análise de custos'
       ],
       route: '/backoffice',
       available: true,
@@ -126,10 +126,10 @@ const ModuleSelection = () => {
     {
       id: 'auditor',
       title: 'Auditor (Legado)',
-      description: 'Sistema de auditoria e enquadramento de porte cir\u00fargico',
+      description: 'Sistema de auditoria e enquadramento de porte cirúrgico',
       icon: ClipboardCheck,
       color: 'bg-blue-500',
-      features: ['Lista de pacientes', 'Enquadramento de porte', 'Relat\u00f3rios de auditoria'],
+      features: ['Lista de pacientes', 'Enquadramento de porte', 'Relatórios de auditoria'],
       route: '/audits',
       available: true,
       highlight: false
@@ -140,7 +140,7 @@ const ModuleSelection = () => {
       description: 'Dashboard executivo e assistente inteligente',
       icon: BarChart3,
       color: 'bg-emerald-500',
-      features: ['Dashboard executivo', 'Chat com IA', 'An\u00e1lise de contratos'],
+      features: ['Dashboard executivo', 'Chat com IA', 'Análise de contratos'],
       route: '/gerencial',
       available: true,
       highlight: false
@@ -148,10 +148,10 @@ const ModuleSelection = () => {
     {
       id: 'analista',
       title: 'Analista (Legado)',
-      description: 'Checklist de documenta\u00e7\u00e3o obrigat\u00f3ria',
+      description: 'Checklist de documentação obrigatória',
       icon: FileCheck,
       color: 'bg-purple-500',
-      features: ['Checklist de documentos', 'Status de conformidade', 'Gest\u00e3o de pend\u00eancias'],
+      features: ['Checklist de documentos', 'Status de conformidade', 'Gestão de pendências'],
       route: '/analista',
       available: true,
       highlight: false
@@ -173,10 +173,10 @@ const ModuleSelection = () => {
             </div>
             <div>
               <h1 className="text-xl font-semibold text-gray-900">
-                Lazarus - Hospital Sagrada Fam\u00edlia
+                Lazarus - Hospital Sagrada Família
               </h1>
               <p className="text-sm text-gray-500">
-                Plataforma Integrada de Gest\u00e3o Hospitalar
+                Plataforma Integrada de Gestão Hospitalar
               </p>
             </div>
           </div>
@@ -205,7 +205,7 @@ const ModuleSelection = () => {
             Workflow de Contas Hospitalares
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Gerencie todo o ciclo de vida da conta hospitalar, da entrada \u00e0 finaliza\u00e7\u00e3o
+            Gerencie todo o ciclo de vida da conta hospitalar, da entrada à finalização
           </p>
         </div>
 
@@ -257,7 +257,7 @@ const ModuleSelection = () => {
 
                     <div className="flex items-center justify-between pt-3">
                       <Badge className="bg-emerald-100 text-emerald-800" variant="secondary">
-                        Dispon\u00edvel
+                        Disponível
                       </Badge>
                       
                       <Button
@@ -279,7 +279,7 @@ const ModuleSelection = () => {
         {/* Legacy Modules */}
         <div className="max-w-6xl mx-auto">
           <h2 className="text-lg font-semibold text-gray-500 mb-4 flex items-center gap-2">
-            <Package className="h-5 w-5" /> M\u00f3dulos Originais
+            <Package className="h-5 w-5" /> Módulos Originais
           </h2>
           <div className="grid md:grid-cols-3 gap-4">
             {legacyModules.map((module) => {
@@ -319,7 +319,7 @@ const ModuleSelection = () => {
           <div className="inline-flex items-center space-x-2 bg-white rounded-full px-6 py-3 shadow-md">
             <Brain className="h-5 w-5 text-purple-600" />
             <span className="text-sm font-medium text-gray-700">
-              Powered by AI \u2022 Workflow Integrado \u2022 Audit Trail Completo
+              Powered by AI • Workflow Integrado • Audit Trail Completo
             </span>
           </div>
         </div>

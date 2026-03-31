@@ -35,7 +35,7 @@ const mockContratos = [
   },
   {
     id: 'CTR-002',
-    operadora: 'Bradesco Sa\u00fade',
+    operadora: 'Bradesco Saúde',
     tipo: 'Plano Individual',
     vigencia: { inicio: '2025-03-01', fim: '2026-02-28' },
     status: 'ativo',
@@ -51,7 +51,7 @@ const mockContratos = [
   },
   {
     id: 'CTR-003',
-    operadora: 'SulAm\u00e9rica',
+    operadora: 'SulAmérica',
     tipo: 'Plano Premium',
     vigencia: { inicio: '2024-06-01', fim: '2026-05-31' },
     status: 'ativo',
@@ -84,7 +84,7 @@ const mockContratos = [
   {
     id: 'CTR-005',
     operadora: 'Hapvida',
-    tipo: 'Plano B\u00e1sico',
+    tipo: 'Plano Básico',
     vigencia: { inicio: '2024-01-01', fim: '2025-12-31' },
     status: 'ativo',
     valorMensal: 180000,
@@ -103,13 +103,13 @@ const mockRecomendacoes = [
   {
     procedimento: 'Artroplastia Total de Joelho',
     codigo: '31301010',
-    melhorOperadora: 'SulAm\u00e9rica',
+    melhorOperadora: 'SulAmérica',
     valorContratual: 12500,
     taxaAprovacao: 94,
     tempoMedioPagamento: '28 dias'
   },
   {
-    procedimento: 'Apendicectomia Videolaparosc\u00f3pica',
+    procedimento: 'Apendicectomia Videolaparoscópica',
     codigo: '31101192',
     melhorOperadora: 'Unimed',
     valorContratual: 8200,
@@ -119,7 +119,7 @@ const mockRecomendacoes = [
   {
     procedimento: 'Colecistectomia',
     codigo: '31201100',
-    melhorOperadora: 'Bradesco Sa\u00fade',
+    melhorOperadora: 'Bradesco Saúde',
     valorContratual: 6800,
     taxaAprovacao: 92,
     tempoMedioPagamento: '32 dias'
@@ -127,7 +127,7 @@ const mockRecomendacoes = [
   {
     procedimento: 'Histerectomia Total',
     codigo: '31401050',
-    melhorOperadora: 'SulAm\u00e9rica',
+    melhorOperadora: 'SulAmérica',
     valorContratual: 9500,
     taxaAprovacao: 91,
     tempoMedioPagamento: '30 dias'
@@ -152,7 +152,7 @@ const Backoffice = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={() => navigate('/modules')}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> M\u00f3dulos
+              <ArrowLeft className="h-4 w-4 mr-1" /> Módulos
             </Button>
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 bg-gray-800 rounded-lg">
@@ -160,7 +160,7 @@ const Backoffice = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Backoffice</h1>
-                <p className="text-sm text-gray-500">Gest\u00e3o de contratos, fornecedores e recomenda\u00e7\u00f5es</p>
+                <p className="text-sm text-gray-500">Gestão de contratos, fornecedores e recomendações</p>
               </div>
             </div>
           </div>
@@ -172,7 +172,7 @@ const Backoffice = () => {
           <TabsList className="bg-white border">
             <TabsTrigger value="contratos">Contratos ({mockContratos.length})</TabsTrigger>
             <TabsTrigger value="fornecedores">Fornecedores ({mockSuppliers.length})</TabsTrigger>
-            <TabsTrigger value="recomendacoes">Recomenda\u00e7\u00f5es de Operadora</TabsTrigger>
+            <TabsTrigger value="recomendacoes">Recomendações de Operadora</TabsTrigger>
           </TabsList>
 
           {/* Contratos */}
@@ -231,7 +231,7 @@ const Backoffice = () => {
                         <p className="text-sm text-gray-500">{contrato.tipo}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-lg font-bold text-emerald-700">{formatCurrency(contrato.valorMensal)}/m\u00eas</p>
+                        <p className="text-lg font-bold text-emerald-700">{formatCurrency(contrato.valorMensal)}/mês</p>
                         <p className="text-xs text-gray-500">Reajuste: {contrato.reajuste}</p>
                       </div>
                     </div>
@@ -240,7 +240,7 @@ const Backoffice = () => {
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-gray-400" />
                         <div>
-                          <p className="text-xs text-gray-500">Vig\u00eancia</p>
+                          <p className="text-xs text-gray-500">Vigência</p>
                           <p className="font-medium">
                             {new Date(contrato.vigencia.inicio).toLocaleDateString('pt-BR')} - {new Date(contrato.vigencia.fim).toLocaleDateString('pt-BR')}
                           </p>
@@ -298,7 +298,7 @@ const Backoffice = () => {
                             fornecedor.tipo === 'materiais' ? 'bg-purple-100 text-purple-800' :
                             'bg-gray-100 text-gray-800'
                           }>
-                            {fornecedor.tipo === 'farmacia' ? 'Farm\u00e1cia' :
+                            {fornecedor.tipo === 'farmacia' ? 'Farmácia' :
                              fornecedor.tipo === 'opme' ? 'OPME' :
                              fornecedor.tipo === 'materiais' ? 'Materiais' : 'Equipamentos'}
                           </Badge>
@@ -355,7 +355,7 @@ const Backoffice = () => {
             </div>
           </TabsContent>
 
-          {/* Recomenda\u00e7\u00f5es */}
+          {/* Recomendações */}
           <TabsContent value="recomendacoes">
             <Card className="mb-4 border-purple-200 bg-gradient-to-r from-purple-50 to-white">
               <CardContent className="p-4">
@@ -364,10 +364,10 @@ const Backoffice = () => {
                     <TrendingUp className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-purple-900 text-sm mb-1">Recomenda\u00e7\u00f5es por IA</h4>
+                    <h4 className="font-semibold text-purple-900 text-sm mb-1">Recomendações por IA</h4>
                     <p className="text-sm text-purple-800">
-                      Com base nos contratos vigentes, hist\u00f3rico de glosas e tempo de pagamento,
-                      estas s\u00e3o as melhores operadoras para cada procedimento.
+                      Com base nos contratos vigentes, histórico de glosas e tempo de pagamento,
+                      estas são as melhores operadoras para cada procedimento.
                     </p>
                   </div>
                 </div>
@@ -379,10 +379,10 @@ const Backoffice = () => {
                 <thead>
                   <tr className="border-b bg-gray-50">
                     <th className="text-left p-4">Procedimento</th>
-                    <th className="text-left p-4">C\u00f3digo</th>
+                    <th className="text-left p-4">Código</th>
                     <th className="text-left p-4">Melhor Operadora</th>
                     <th className="text-right p-4">Valor Contratual</th>
-                    <th className="text-center p-4">Taxa Aprova\u00e7\u00e3o</th>
+                    <th className="text-center p-4">Taxa Aprovação</th>
                     <th className="text-center p-4">Tempo Pgto</th>
                   </tr>
                 </thead>

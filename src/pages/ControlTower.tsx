@@ -122,7 +122,7 @@ const ControlTower = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" onClick={() => navigate('/modules')}>
-                <ArrowLeft className="h-4 w-4 mr-1" /> M\u00f3dulos
+                <ArrowLeft className="h-4 w-4 mr-1" /> Módulos
               </Button>
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg">
@@ -130,7 +130,7 @@ const ControlTower = () => {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-gray-900">Control Tower</h1>
-                  <p className="text-sm text-gray-500">Vis\u00e3o completa do workflow de contas hospitalares</p>
+                  <p className="text-sm text-gray-500">Visão completa do workflow de contas hospitalares</p>
                 </div>
               </div>
             </div>
@@ -148,7 +148,7 @@ const ControlTower = () => {
       </div>
 
       <div className="px-6 py-4">
-        {/* M\u00e9tricas Resumo */}
+        {/* Métricas Resumo */}
         <div className="grid grid-cols-2 md:grid-cols-7 gap-3 mb-6">
           <Card className="p-3">
             <p className="text-xs text-gray-500">Total Contas</p>
@@ -167,11 +167,11 @@ const ControlTower = () => {
             <p className="text-xl font-bold text-orange-600">{metrics.taxaGlosa}%</p>
           </Card>
           <Card className="p-3">
-            <p className="text-xs text-gray-500">Contas Cr\u00edticas</p>
+            <p className="text-xs text-gray-500">Contas Críticas</p>
             <p className="text-xl font-bold text-red-600">{metrics.contasCriticas}</p>
           </Card>
           <Card className="p-3">
-            <p className="text-xs text-gray-500">Tempo M\u00e9dio</p>
+            <p className="text-xs text-gray-500">Tempo Médio</p>
             <p className="text-xl font-bold">{metrics.tempoMedioProcessamento}</p>
           </Card>
           <Card className="p-3">
@@ -198,7 +198,7 @@ const ControlTower = () => {
               onClickAccount={handleClickAccount}
             />
             <KanbanColumn
-              title="M\u00e9dica"
+              title="Médica"
               color="bg-emerald-600"
               icon={<Eye className="h-4 w-4" />}
               accounts={phases.medica}

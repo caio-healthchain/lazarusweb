@@ -38,7 +38,7 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="p-8 text-center">
-          <h2 className="text-xl font-bold mb-2">Conta n\u00e3o encontrada</h2>
+          <h2 className="text-xl font-bold mb-2">Conta não encontrada</h2>
           <Button onClick={() => navigate(backPath)}>Voltar</Button>
         </Card>
       </div>
@@ -46,19 +46,19 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
   }
 
   const handleAvancar = () => {
-    toast.success('Conta avan\u00e7ada para a pr\u00f3xima etapa do workflow!');
+    toast.success('Conta avançada para a próxima etapa do workflow!');
     navigate(backPath);
   };
 
   const handleDevolver = () => {
-    toast.info('Conta devolvida para a etapa anterior com pend\u00eancia.');
+    toast.info('Conta devolvida para a etapa anterior com pendência.');
     navigate(backPath);
   };
 
   const frenteConfig = {
     administrativa: { color: 'purple', label: 'Frente Administrativa', icon: ClipboardCheck },
     enfermagem: { color: 'blue', label: 'Frente de Enfermagem', icon: Package },
-    medica: { color: 'emerald', label: 'Frente M\u00e9dica', icon: Stethoscope }
+    medica: { color: 'emerald', label: 'Frente Médica', icon: Stethoscope }
   };
 
   const config = frenteConfig[frente];
@@ -91,7 +91,7 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
                 <ArrowLeft className="h-4 w-4 mr-1" /> Devolver
               </Button>
               <Button size="sm" onClick={handleAvancar} className="bg-emerald-600 hover:bg-emerald-700">
-                Avan\u00e7ar <ArrowRight className="h-4 w-4 ml-1" />
+                Avançar <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
           </div>
@@ -109,13 +109,13 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
           </Card>
           <Card className="p-3">
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-              <Stethoscope className="h-3.5 w-3.5" /> M\u00e9dico
+              <Stethoscope className="h-3.5 w-3.5" /> Médico
             </div>
             <p className="font-semibold text-sm">{account.medicoResponsavel}</p>
           </Card>
           <Card className="p-3">
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-              <Calendar className="h-3.5 w-3.5" /> Interna\u00e7\u00e3o
+              <Calendar className="h-3.5 w-3.5" /> Internação
             </div>
             <p className="font-semibold text-sm">{new Date(account.dataInternacao).toLocaleDateString('pt-BR')}</p>
           </Card>
@@ -123,7 +123,7 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
               <Calendar className="h-3.5 w-3.5" /> Alta
             </div>
-            <p className="font-semibold text-sm">{account.dataAlta ? new Date(account.dataAlta).toLocaleDateString('pt-BR') : 'Em interna\u00e7\u00e3o'}</p>
+            <p className="font-semibold text-sm">{account.dataAlta ? new Date(account.dataAlta).toLocaleDateString('pt-BR') : 'Em internação'}</p>
           </Card>
           <Card className="p-3">
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
@@ -141,7 +141,7 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
           </Card>
         </div>
 
-        {/* Copilot IA - Recomenda\u00e7\u00f5es Contextuais */}
+        {/* Copilot IA - Recomendações Contextuais */}
         <Card className="mb-6 border-purple-200 bg-gradient-to-r from-purple-50 to-white">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
@@ -149,23 +149,23 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
                 <Brain className="h-4 w-4 text-white" />
               </div>
               <div>
-                <h4 className="font-semibold text-purple-900 text-sm mb-1">Copilot - Recomenda\u00e7\u00f5es</h4>
+                <h4 className="font-semibold text-purple-900 text-sm mb-1">Copilot - Recomendações</h4>
                 {frente === 'administrativa' && (
                   <div className="text-sm text-purple-800 space-y-1">
-                    <p>Verifique se a <strong>autoriza\u00e7\u00e3o pr\u00e9via</strong> est\u00e1 dentro da validade. Para {account.operadora}, o prazo m\u00e9dio de aprova\u00e7\u00e3o \u00e9 de 48h.</p>
-                    <p>Documentos pendentes: {account.documentos.filter(d => d.status === 'pendente').length} item(ns). Priorize os obrigat\u00f3rios.</p>
+                    <p>Verifique se a <strong>autorização prévia</strong> está dentro da validade. Para {account.operadora}, o prazo médio de aprovação é de 48h.</p>
+                    <p>Documentos pendentes: {account.documentos.filter(d => d.status === 'pendente').length} item(ns). Priorize os obrigatórios.</p>
                   </div>
                 )}
                 {frente === 'enfermagem' && (
                   <div className="text-sm text-purple-800 space-y-1">
-                    <p>Existem <strong>{account.materiais.filter(m => !m.validado).length} materiais</strong> e <strong>{account.medicamentos.filter(m => !m.validado).length} medicamentos</strong> pendentes de valida\u00e7\u00e3o.</p>
-                    <p>Confira lotes, validades e notas fiscais antes de avan\u00e7ar.</p>
+                    <p>Existem <strong>{account.materiais.filter(m => !m.validado).length} materiais</strong> e <strong>{account.medicamentos.filter(m => !m.validado).length} medicamentos</strong> pendentes de validação.</p>
+                    <p>Confira lotes, validades e notas fiscais antes de avançar.</p>
                   </div>
                 )}
                 {frente === 'medica' && (
                   <div className="text-sm text-purple-800 space-y-1">
-                    <p>Procedimento principal: <strong>{account.procedimentoPrincipal}</strong>. Verifique se h\u00e1 justificativa cl\u00ednica para todos os procedimentos.</p>
-                    <p>Para {account.operadora}, o contrato exige relat\u00f3rio cir\u00fargico detalhado.</p>
+                    <p>Procedimento principal: <strong>{account.procedimentoPrincipal}</strong>. Verifique se há justificativa clínica para todos os procedimentos.</p>
+                    <p>Para {account.operadora}, o contrato exige relatório cirúrgico detalhado.</p>
                   </div>
                 )}
               </div>
@@ -181,7 +181,7 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
             <TabsTrigger value="medicamentos">Medicamentos ({account.medicamentos.length})</TabsTrigger>
             <TabsTrigger value="documentos">Documentos ({account.documentos.length})</TabsTrigger>
             <TabsTrigger value="auditoria">Auditoria ({account.auditoriaConcorrente.length})</TabsTrigger>
-            <TabsTrigger value="historico">Hist\u00f3rico ({account.historico.length})</TabsTrigger>
+            <TabsTrigger value="historico">Histórico ({account.historico.length})</TabsTrigger>
           </TabsList>
 
           {/* Procedimentos */}
@@ -253,8 +253,8 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
                     <thead>
                       <tr className="border-b bg-gray-50">
                         <th className="text-left p-3">Validado</th>
-                        <th className="text-left p-3">C\u00f3digo</th>
-                        <th className="text-left p-3">Descri\u00e7\u00e3o</th>
+                        <th className="text-left p-3">Código</th>
+                        <th className="text-left p-3">Descrição</th>
                         <th className="text-center p-3">Qtd</th>
                         <th className="text-right p-3">Valor Unit.</th>
                         <th className="text-right p-3">Valor Total</th>
@@ -315,13 +315,13 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
                     <thead>
                       <tr className="border-b bg-gray-50">
                         <th className="text-left p-3">Validado</th>
-                        <th className="text-left p-3">C\u00f3digo</th>
-                        <th className="text-left p-3">Descri\u00e7\u00e3o</th>
+                        <th className="text-left p-3">Código</th>
+                        <th className="text-left p-3">Descrição</th>
                         <th className="text-center p-3">Qtd</th>
                         <th className="text-right p-3">Valor Unit.</th>
                         <th className="text-right p-3">Valor Total</th>
-                        <th className="text-left p-3">Farm\u00e1cia</th>
-                        <th className="text-center p-3">Prescri\u00e7\u00e3o</th>
+                        <th className="text-left p-3">Farmácia</th>
+                        <th className="text-center p-3">Prescrição</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -398,9 +398,9 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
                         <div>
                           <p className="font-medium text-sm">{doc.nome}</p>
                           <p className="text-xs text-gray-500">
-                            {doc.obrigatorio ? 'Obrigat\u00f3rio' : 'Opcional'} 
-                            {doc.responsavel && ` \u2022 ${doc.responsavel}`}
-                            {doc.dataUpload && ` \u2022 ${new Date(doc.dataUpload).toLocaleDateString('pt-BR')}`}
+                            {doc.obrigatorio ? 'Obrigatório' : 'Opcional'} 
+                            {doc.responsavel && ` • ${doc.responsavel}`}
+                            {doc.dataUpload && ` • ${new Date(doc.dataUpload).toLocaleDateString('pt-BR')}`}
                           </p>
                         </div>
                       </div>
@@ -469,7 +469,7 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
                 <div className="mt-4 p-4 border-2 border-dashed rounded-lg">
                   <h4 className="font-medium text-sm mb-2">Registrar Auditoria</h4>
                   <Textarea 
-                    placeholder="Descreva a observa\u00e7\u00e3o da auditoria..." 
+                    placeholder="Descreva a observação da auditoria..." 
                     value={observacao}
                     onChange={(e) => setObservacao(e.target.value)}
                     className="mb-2"
@@ -487,12 +487,12 @@ const AccountDetails = ({ frente, backPath }: AccountDetailsProps) => {
             </Card>
           </TabsContent>
 
-          {/* Hist\u00f3rico do Workflow */}
+          {/* Histórico do Workflow */}
           <TabsContent value="historico">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <History className="h-5 w-5 text-gray-500" /> Hist\u00f3rico do Workflow
+                  <History className="h-5 w-5 text-gray-500" /> Histórico do Workflow
                 </CardTitle>
               </CardHeader>
               <CardContent>

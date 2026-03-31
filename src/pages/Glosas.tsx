@@ -55,7 +55,7 @@ const Glosas = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={() => navigate('/modules')}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> M\u00f3dulos
+              <ArrowLeft className="h-4 w-4 mr-1" /> Módulos
             </Button>
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 bg-red-600 rounded-lg">
@@ -63,7 +63,7 @@ const Glosas = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Glosas e Laudos</h1>
-                <p className="text-sm text-gray-500">Gest\u00e3o de glosas, recursos e gera\u00e7\u00e3o de laudos</p>
+                <p className="text-sm text-gray-500">Gestão de glosas, recursos e geração de laudos</p>
               </div>
             </div>
           </div>

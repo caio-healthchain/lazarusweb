@@ -33,7 +33,7 @@ const GlosaDetails = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="p-8 text-center">
-          <h2 className="text-xl font-bold mb-2">Conta n\u00e3o encontrada</h2>
+          <h2 className="text-xl font-bold mb-2">Conta não encontrada</h2>
           <Button onClick={() => navigate('/glosas')}>Voltar</Button>
         </Card>
       </div>
@@ -68,7 +68,7 @@ const GlosaDetails = () => {
 
   const handleGerarLaudo = () => {
     setLaudoGerado(true);
-    toast.success('Laudo gerado com sucesso! Pronto para envio \u00e0 operadora.');
+    toast.success('Laudo gerado com sucesso! Pronto para envio à operadora.');
   };
 
   const valorGlosadoTotal = account.glosas.reduce((acc, g) => acc + g.valorGlosado, 0);
@@ -144,7 +144,7 @@ const GlosaDetails = () => {
           </Card>
           <Card className="p-3">
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-              <Stethoscope className="h-3.5 w-3.5" /> M\u00e9dico
+              <Stethoscope className="h-3.5 w-3.5" /> Médico
             </div>
             <p className="font-semibold text-sm">{account.medicoResponsavel}</p>
           </Card>
@@ -170,13 +170,13 @@ const GlosaDetails = () => {
                 <Brain className="h-4 w-4 text-white" />
               </div>
               <div>
-                <h4 className="font-semibold text-purple-900 text-sm mb-1">Copilot - An\u00e1lise de Glosas</h4>
+                <h4 className="font-semibold text-purple-900 text-sm mb-1">Copilot - Análise de Glosas</h4>
                 <div className="text-sm text-purple-800 space-y-1">
                   <p>Esta conta possui <strong>{account.glosas.length} glosa(s)</strong> totalizando <strong>{formatCurrency(valorGlosadoTotal)}</strong>.</p>
-                  <p>Recomenda\u00e7\u00e3o: {glosasEmRecurso > 0 ?
-                    `Existem ${glosasEmRecurso} glosa(s) em recurso. Gere o laudo com as justificativas cl\u00ednicas para envio \u00e0 operadora.` :
+                  <p>Recomendação: {glosasEmRecurso > 0 ?
+                    `Existem ${glosasEmRecurso} glosa(s) em recurso. Gere o laudo com as justificativas clínicas para envio à operadora.` :
                     glosasPendentes > 0 ?
-                    `Analise as ${glosasPendentes} glosa(s) pendentes. Para ${account.operadora}, o prazo de recurso \u00e9 de 30 dias.` :
+                    `Analise as ${glosasPendentes} glosa(s) pendentes. Para ${account.operadora}, o prazo de recurso é de 30 dias.` :
                     'Todas as glosas foram tratadas. Gere o laudo final para fechamento.'
                   }</p>
                 </div>
@@ -197,7 +197,7 @@ const GlosaDetails = () => {
               <div className="bg-white p-4 rounded-lg border text-sm space-y-3">
                 <div className="flex justify-between items-center border-b pb-2">
                   <span className="font-bold text-lg">LAUDO DE CONTA HOSPITALAR</span>
-                  <span className="text-gray-500">N\u00ba {account.id}-L001</span>
+                  <span className="text-gray-500">Nº {account.id}-L001</span>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -206,15 +206,15 @@ const GlosaDetails = () => {
                     <p><strong>Procedimento:</strong> {account.procedimentoPrincipal}</p>
                   </div>
                   <div>
-                    <p><strong>Interna\u00e7\u00e3o:</strong> {new Date(account.dataInternacao).toLocaleDateString('pt-BR')}</p>
+                    <p><strong>Internação:</strong> {new Date(account.dataInternacao).toLocaleDateString('pt-BR')}</p>
                     <p><strong>Alta:</strong> {account.dataAlta ? new Date(account.dataAlta).toLocaleDateString('pt-BR') : 'N/A'}</p>
-                    <p><strong>M\u00e9dico:</strong> {account.medicoResponsavel}</p>
+                    <p><strong>Médico:</strong> {account.medicoResponsavel}</p>
                   </div>
                 </div>
                 <div className="border-t pt-2">
                   <p><strong>Valor da Conta:</strong> {formatCurrency(account.valorTotal)}</p>
                   <p><strong>Valor Glosado:</strong> {formatCurrency(valorGlosadoTotal)}</p>
-                  <p><strong>Valor L\u00edquido:</strong> {formatCurrency(account.valorTotal - valorGlosadoTotal)}</p>
+                  <p><strong>Valor Líquido:</strong> {formatCurrency(account.valorTotal - valorGlosadoTotal)}</p>
                 </div>
                 <div className="border-t pt-2">
                   <p className="font-semibold mb-1">Resumo das Glosas:</p>
@@ -228,11 +228,11 @@ const GlosaDetails = () => {
                   <div className="border-t pt-2">
                     <p className="font-semibold mb-1">Parecer:</p>
                     <p className="text-gray-600">{account.laudo.parecer}</p>
-                    <p className="text-gray-600 mt-1"><strong>Conclus\u00e3o:</strong> {account.laudo.conclusao}</p>
+                    <p className="text-gray-600 mt-1"><strong>Conclusão:</strong> {account.laudo.conclusao}</p>
                   </div>
                 )}
                 <div className="border-t pt-2 text-right text-gray-500 text-xs">
-                  Gerado em: {new Date().toLocaleString('pt-BR')} | Hospital Sagrada Fam\u00edlia
+                  Gerado em: {new Date().toLocaleString('pt-BR')} | Hospital Sagrada Família
                 </div>
               </div>
             </CardContent>
@@ -244,7 +244,7 @@ const GlosaDetails = () => {
           <TabsList className="bg-white border">
             <TabsTrigger value="glosas">Glosas ({account.glosas.length})</TabsTrigger>
             <TabsTrigger value="procedimentos">Procedimentos ({account.procedimentos.length})</TabsTrigger>
-            <TabsTrigger value="historico">Hist\u00f3rico ({account.historico.length})</TabsTrigger>
+            <TabsTrigger value="historico">Histórico ({account.historico.length})</TabsTrigger>
           </TabsList>
 
           {/* Glosas */}
@@ -287,7 +287,7 @@ const GlosaDetails = () => {
                             </Badge>
                             <Badge variant="secondary" className="text-xs">
                               {glosa.tipo === 'administrativa' ? 'Administrativa' :
-                               glosa.tipo === 'tecnica' ? 'T\u00e9cnica' : 'Linear'}
+                               glosa.tipo === 'tecnica' ? 'Técnica' : 'Linear'}
                             </Badge>
                           </div>
                           <p className="font-medium">{glosa.descricao}</p>
@@ -322,7 +322,7 @@ const GlosaDetails = () => {
                       {glosa.status === 'em_recurso' && !glosa.justificativaRecurso && (
                         <div className="mt-3 pt-3 border-t space-y-2">
                           <Textarea
-                            placeholder="Justificativa cl\u00ednica para o recurso..."
+                            placeholder="Justificativa clínica para o recurso..."
                             value={justificativa}
                             onChange={(e) => setJustificativa(e.target.value)}
                           />
@@ -386,12 +386,12 @@ const GlosaDetails = () => {
             </Card>
           </TabsContent>
 
-          {/* Hist\u00f3rico */}
+          {/* Histórico */}
           <TabsContent value="historico">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <History className="h-5 w-5 text-gray-500" /> Hist\u00f3rico do Workflow
+                  <History className="h-5 w-5 text-gray-500" /> Histórico do Workflow
                 </CardTitle>
               </CardHeader>
               <CardContent>

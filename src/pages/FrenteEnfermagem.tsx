@@ -45,7 +45,7 @@ const FrenteEnfermagem = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={() => navigate('/modules')}>
-              <ArrowLeft className="h-4 w-4 mr-1" /> M\u00f3dulos
+              <ArrowLeft className="h-4 w-4 mr-1" /> Módulos
             </Button>
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg">
@@ -53,7 +53,7 @@ const FrenteEnfermagem = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Frente de Enfermagem</h1>
-                <p className="text-sm text-gray-500">Valida\u00e7\u00e3o de materiais, medicamentos e complemento da conta</p>
+                <p className="text-sm text-gray-500">Validação de materiais, medicamentos e complemento da conta</p>
               </div>
             </div>
           </div>
@@ -126,7 +126,7 @@ const FrenteEnfermagem = () => {
               Pendentes ({pendentes})
             </Button>
             <Button variant={statusFilter === 'em_analise' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('em_analise')}>
-              Em An\u00e1lise ({emAnalise})
+              Em Análise ({emAnalise})
             </Button>
           </div>
         </div>
