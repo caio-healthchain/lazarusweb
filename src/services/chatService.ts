@@ -24,40 +24,44 @@ const findMockResponse = (message: string): string => {
   return MOCK_CHAT_RESPONSES.default;
 };
 
+// Enviar mensagem e receber resposta
+export const sendMessage = async (message: string, conversationId?: string): Promise<string> => {
+  console.log('💬 Chat Mock - Mensagem do usuário:', message);
+  
+  // Simular delay de processamento
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  const response = findMockResponse(message);
+  console.log('💬 Chat Mock - Resposta:', response);
+  
+  return response;
+};
+
+// Obter histórico de conversas (mock)
+export const getConversationHistory = async (): Promise<ChatMessage[]> => {
+  return [
+    {
+      id: '1',
+      role: 'assistant',
+      content: MOCK_CHAT_RESPONSES.default,
+      timestamp: new Date(Date.now() - 5 * 60000),
+    },
+  ];
+};
+
+// Obter informações do sistema para o chat
+export const getSystemInfo = () => {
+  return {
+    hospital: 'Hospital Sagrada Família',
+    metrics: MOCK_DASHBOARD_METRICS,
+    timestamp: new Date().toISOString(),
+  };
+};
+
 export const chatService = {
-  // Enviar mensagem e receber resposta
-  sendMessage: async (message: string): Promise<string> => {
-    console.log('💬 Chat Mock - Mensagem do usuário:', message);
-    
-    // Simular delay de processamento
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const response = findMockResponse(message);
-    console.log('💬 Chat Mock - Resposta:', response);
-    
-    return response;
-  },
-
-  // Obter histórico de conversas (mock)
-  getConversationHistory: async (): Promise<ChatMessage[]> => {
-    return [
-      {
-        id: '1',
-        role: 'assistant',
-        content: MOCK_CHAT_RESPONSES.default,
-        timestamp: new Date(Date.now() - 5 * 60000),
-      },
-    ];
-  },
-
-  // Obter informações do sistema para o chat
-  getSystemInfo: () => {
-    return {
-      hospital: 'Hospital Sagrada Família',
-      metrics: MOCK_DASHBOARD_METRICS,
-      timestamp: new Date().toISOString(),
-    };
-  },
+  sendMessage,
+  getConversationHistory,
+  getSystemInfo,
 };
 
 export default chatService;
