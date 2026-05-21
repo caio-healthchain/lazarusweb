@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { useMsal } from '@azure/msal-react';
-import { loginRequest } from '@/config/auth';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,11 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { 
-  Loader2, 
-  Shield, 
-  Hospital, 
-  Sparkles, 
+import {
+  Loader2,
+  Shield,
+  Hospital,
   Brain,
   BarChart3,
   Users,
@@ -23,14 +20,17 @@ import {
   Building,
   Phone,
   CheckCircle,
-  ArrowRight,
-  Send
+  Send,
+  KeyRound,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Login = () => {
-  const { instance } = useMsal();
-  const { isAuthenticated, isLoading, setLoading, setAuthenticated, setUser, setAccessToken, loginDemo } = useAuthStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated, isLoading, login } = useAuthStore();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [showAccessForm, setShowAccessForm] = useState(false);
   const [accessFormData, setAccessFormData] = useState({
@@ -39,88 +39,44 @@ const Login = () => {
     company: '',
     phone: '',
     role: '',
-    reason: ''
+    reason: '',
   });
   const [accessFormSubmitted, setAccessFormSubmitted] = useState(false);
 
-  // Redirecionar se já autenticado
   if (isAuthenticated) {
     return <Navigate to="/select-hospital" replace />;
   }
 
-  const handleAzureLogin = async () => {
+  const handleCustomLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
+
+    if (!email.trim() || !password) {
+      setError('Informe e-mail e senha para acessar a plataforma.');
+      return;
+    }
+
     try {
-      setLoading(true);
-      setError(null);
+      const response = await login(email, password);
+      toast.success(`Bem-vindo, ${response.user.name}!`);
 
-      // Passo 1: Login popup do Azure AD
-      const response = await instance.loginPopup(loginRequest);
-      
-      if (response.account && response.accessToken) {
-        // Passo 2: Enviar access token do Azure AD para o backend validar e gerar JWT próprio
-        const axios = (await import('axios')).default;
-        const { API_CONFIG } = await import('@/config/auth');
-        
-        const backendResponse = await axios.post(
-          `${API_CONFIG.baseUrl}/users/users/auth/azure/callback`,
-          { 
-            azureAccessToken: response.accessToken,
-            azureIdToken: response.idToken
-          }
-        );
-
-        // Passo 3: Salvar JWT do backend (não o token do Azure)
-        const { accessToken, user: userData, hospitals } = backendResponse.data;
-        
-        setUser({
-          id: userData.id,
-          name: userData.name,
-          email: userData.email,
-          roles: ['auditor'],
-          avatar: userData.avatar,
-        });
-        
-        setAccessToken(accessToken); // JWT do ms-users
-        setAuthenticated(true);
-        
-        toast.success(`Bem-vindo, ${userData.name}!`);
-        
-        // Redirecionar para seleção de hospital
-        window.location.href = '/select-hospital';
-      }
+      const redirectTo = (location.state as any)?.from?.pathname || '/select-hospital';
+      navigate(redirectTo === '/login' ? '/select-hospital' : redirectTo, { replace: true });
     } catch (error: any) {
-      console.error('Erro no login Azure AD:', error);
-      setError('Erro ao fazer login com Azure AD. Tente novamente.');
-      toast.error('Erro no login Azure AD');
-    } finally {
-      setLoading(false);
+      const backendMessage = error?.response?.data?.message || error?.response?.data?.error;
+      const message = backendMessage || 'Não foi possível autenticar. Verifique suas credenciais e tente novamente.';
+      setError(message);
+      toast.error('Falha no login');
     }
   };
 
-  const handleDemoLogin = async () => {
-    // Por enquanto, acesso direto (conforme solicitado)
-    setLoading(true);
-    
-    try {
-      await loginDemo();
-      toast.success('Login demo realizado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao gerar token:', error);
-      toast.error('Erro ao fazer login demo');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleAccessFormSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
 
-  const handleAccessFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Simular envio do formulário
     setTimeout(() => {
       setAccessFormSubmitted(true);
       toast.success('Solicitação enviada com sucesso!');
-      
-      // Reset form after 3 seconds
+
       setTimeout(() => {
         setShowAccessForm(false);
         setAccessFormSubmitted(false);
@@ -130,7 +86,7 @@ const Login = () => {
           company: '',
           phone: '',
           role: '',
-          reason: ''
+          reason: '',
         });
       }, 3000);
     }, 1000);
@@ -140,23 +96,22 @@ const Login = () => {
     {
       icon: BarChart3,
       title: 'Dashboard Executivo',
-      description: 'Métricas e KPIs em tempo real'
+      description: 'Métricas e KPIs em tempo real',
     },
     {
       icon: Brain,
       title: 'IA Especializada',
-      description: 'Assistente inteligente para gestão'
+      description: 'Assistente inteligente para gestão',
     },
     {
       icon: Users,
       title: 'Gestão Integrada',
-      description: 'Controle completo de operações'
-    }
+      description: 'Controle completo de operações',
+    },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 relative overflow-hidden">
-      {/* Background Effects */}
       <div className="absolute inset-0">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
@@ -164,10 +119,8 @@ const Login = () => {
       </div>
 
       <div className="relative z-10 min-h-screen flex">
-        {/* Left Side - Branding */}
         <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-12">
           <div className="max-w-lg">
-            {/* Logo */}
             <div className="flex items-center space-x-3 mb-8">
               <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-emerald-600 rounded-2xl">
                 <Hospital className="h-8 w-8 text-white" />
@@ -178,18 +131,16 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Headline */}
             <h2 className="text-4xl font-bold text-white mb-6 leading-tight">
               Plataforma Inteligente de
               <span className="bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent"> Gestão Hospitalar</span>
             </h2>
 
             <p className="text-xl text-blue-100 mb-12 leading-relaxed">
-              Transforme a gestão do seu hospital com inteligência artificial, 
+              Transforme a gestão do seu hospital com inteligência artificial,
               analytics avançados e automação de processos.
             </p>
 
-            {/* Features */}
             <div className="space-y-6">
               {features.map((feature, index) => {
                 const IconComponent = feature.icon;
@@ -209,10 +160,8 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Right Side - Login Form */}
         <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
           <div className="w-full max-w-md">
-            {/* Mobile Logo */}
             <div className="lg:hidden text-center mb-8">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-emerald-600 rounded-2xl mb-4">
                 <Hospital className="h-8 w-8 text-white" />
@@ -221,20 +170,17 @@ const Login = () => {
               <p className="text-blue-200">Gestão Hospitalar Inteligente</p>
             </div>
 
-            {/* Login Card */}
             <Card className="backdrop-blur-xl bg-white/10 border-white/20 shadow-2xl">
               <CardHeader className="text-center pb-6">
                 <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl mx-auto mb-4">
                   <Shield className="h-6 w-6 text-white" />
                 </div>
-                <CardTitle className="text-2xl font-bold text-white">
-                  Acesso Seguro
-                </CardTitle>
+                <CardTitle className="text-2xl font-bold text-white">Acesso Seguro</CardTitle>
                 <CardDescription className="text-blue-100">
-                  Entre na plataforma para continuar
+                  Entre com seu e-mail corporativo e senha Lazarus
                 </CardDescription>
               </CardHeader>
-              
+
               <CardContent className="space-y-6">
                 {error && (
                   <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
@@ -242,60 +188,75 @@ const Login = () => {
                   </Alert>
                 )}
 
-                {/* Azure AD Login - BYPASS PARA DEMO */}
-                <Button
-                  onClick={handleDemoLogin}
-                  disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-0 h-12 text-base font-medium"
-                  size="lg"
-                >
-                  {isLoading ? (
-                    <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                  ) : (
-                    <Shield className="mr-3 h-5 w-5" />
-                  )}
-                  Entrar na Plataforma
-                </Button>
-
-                {/* Demo Access - Desabilitado */}
-                {/* <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-white/20" />
+                <form onSubmit={handleCustomLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-blue-100">E-mail</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-5 w-5 text-blue-200/70" />
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        autoComplete="email"
+                        placeholder="voce@hospital.com.br"
+                        className="h-12 pl-11 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 focus-visible:ring-blue-300"
+                        disabled={isLoading}
+                        required
+                      />
+                    </div>
                   </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-transparent px-3 text-blue-200 font-medium">ou</span>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-blue-100">Senha</Label>
+                    <div className="relative">
+                      <KeyRound className="absolute left-3 top-3 h-5 w-5 text-blue-200/70" />
+                      <Input
+                        id="password"
+                        type="password"
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        autoComplete="current-password"
+                        placeholder="Digite sua senha"
+                        className="h-12 pl-11 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 focus-visible:ring-blue-300"
+                        disabled={isLoading}
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <Button
-                  onClick={handleDemoLogin}
-                  disabled={true}
-                  variant="outline"
-                  className="w-full bg-white/5 border-white/20 text-white hover:bg-white/10 hover:border-white/30 h-12 text-base font-medium"
-                  size="lg"
-                >
-                  <Sparkles className="mr-3 h-5 w-5" />
-                  Acesso Demo
-                </Button> */}
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-0 h-12 text-base font-medium"
+                    size="lg"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                    ) : (
+                      <Shield className="mr-3 h-5 w-5" />
+                    )}
+                    Entrar na Plataforma
+                  </Button>
+                </form>
 
-                {/* Request Access (Disabled for now) */}
                 <Dialog open={showAccessForm} onOpenChange={setShowAccessForm}>
                   <DialogTrigger asChild>
                     <Button
                       variant="ghost"
                       className="w-full text-blue-200 hover:text-white hover:bg-white/5 h-10 text-sm"
-                      disabled // Desabilitado conforme solicitado
+                      disabled
                     >
                       <Lock className="mr-2 h-4 w-4" />
                       Solicitar Acesso (Em breve)
                     </Button>
                   </DialogTrigger>
-                  
+
                   <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                       <DialogTitle className="flex items-center">
                         <Mail className="mr-2 h-5 w-5 text-blue-600" />
-                        Solicitar Acesso Demo
+                        Solicitar Acesso
                       </DialogTitle>
                       <DialogDescription>
                         Preencha os dados abaixo para solicitar acesso à plataforma
@@ -310,17 +271,17 @@ const Login = () => {
                             <Input
                               id="name"
                               value={accessFormData.name}
-                              onChange={(e) => setAccessFormData(prev => ({ ...prev, name: e.target.value }))}
+                              onChange={(event) => setAccessFormData((prev) => ({ ...prev, name: event.target.value }))}
                               required
                             />
                           </div>
                           <div>
-                            <Label htmlFor="email">E-mail</Label>
+                            <Label htmlFor="access-email">E-mail</Label>
                             <Input
-                              id="email"
+                              id="access-email"
                               type="email"
                               value={accessFormData.email}
-                              onChange={(e) => setAccessFormData(prev => ({ ...prev, email: e.target.value }))}
+                              onChange={(event) => setAccessFormData((prev) => ({ ...prev, email: event.target.value }))}
                               required
                             />
                           </div>
@@ -332,7 +293,7 @@ const Login = () => {
                             <Input
                               id="company"
                               value={accessFormData.company}
-                              onChange={(e) => setAccessFormData(prev => ({ ...prev, company: e.target.value }))}
+                              onChange={(event) => setAccessFormData((prev) => ({ ...prev, company: event.target.value }))}
                               required
                             />
                           </div>
@@ -341,7 +302,7 @@ const Login = () => {
                             <Input
                               id="phone"
                               value={accessFormData.phone}
-                              onChange={(e) => setAccessFormData(prev => ({ ...prev, phone: e.target.value }))}
+                              onChange={(event) => setAccessFormData((prev) => ({ ...prev, phone: event.target.value }))}
                               required
                             />
                           </div>
@@ -352,7 +313,7 @@ const Login = () => {
                           <Input
                             id="role"
                             value={accessFormData.role}
-                            onChange={(e) => setAccessFormData(prev => ({ ...prev, role: e.target.value }))}
+                            onChange={(event) => setAccessFormData((prev) => ({ ...prev, role: event.target.value }))}
                             placeholder="Ex: Diretor Médico, Gerente de TI..."
                             required
                           />
@@ -363,7 +324,7 @@ const Login = () => {
                           <Textarea
                             id="reason"
                             value={accessFormData.reason}
-                            onChange={(e) => setAccessFormData(prev => ({ ...prev, reason: e.target.value }))}
+                            onChange={(event) => setAccessFormData((prev) => ({ ...prev, reason: event.target.value }))}
                             placeholder="Descreva brevemente como pretende usar a plataforma..."
                             rows={3}
                             required
@@ -378,26 +339,21 @@ const Login = () => {
                     ) : (
                       <div className="text-center py-6">
                         <CheckCircle className="h-16 w-16 text-emerald-500 mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                          Solicitação Enviada!
-                        </h3>
-                        <p className="text-gray-600">
-                          Entraremos em contato em até 24 horas úteis.
-                        </p>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Solicitação Enviada!</h3>
+                        <p className="text-gray-600">Entraremos em contato em até 24 horas úteis.</p>
                       </div>
                     )}
                   </DialogContent>
                 </Dialog>
 
                 <p className="text-xs text-center text-blue-200/80 leading-relaxed">
-                  Plataforma segura com criptografia de ponta a ponta
+                  Plataforma segura com autenticação própria Lazarus
                   <br />
                   Dados protegidos conforme LGPD
                 </p>
               </CardContent>
             </Card>
 
-            {/* Footer */}
             <div className="text-center mt-8 text-sm text-blue-200/60">
               © 2024 HealthChain Solutions
               <br />

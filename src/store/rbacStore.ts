@@ -8,6 +8,7 @@ export type UserProfile =
   | 'enfermeiro'     // Frente Enfermagem + Auditoria
   | 'analista'       // Frente Administrativa + Glosas + Backoffice
   | 'auditor'        // Todas as frentes + Auditoria
+  | 'gerencial'      // Dashboard executivo e chat financeiro
   | 'admin';         // Tudo (equivalente a diretor)
 
 // Módulos disponíveis
@@ -50,6 +51,9 @@ const PROFILE_PERMISSIONS: Record<UserProfile, AppModule[]> = {
     'frente-medica', 'glosas', 'backoffice', 'gerencial', 'gerencial-chat',
     'auditor-legado', 'analista-legado'
   ],
+  gerencial: [
+    'central-contas', 'gerencial', 'gerencial-chat'
+  ],
 };
 
 // Rota padrão por perfil (onde cai ao logar)
@@ -60,6 +64,7 @@ const DEFAULT_ROUTES: Record<UserProfile, string> = {
   enfermeiro: '/frente-enfermagem',
   analista: '/frente-administrativa',
   auditor: '/central-contas',
+  gerencial: '/gerencial',
 };
 
 // Labels amigáveis dos perfis
@@ -70,6 +75,7 @@ export const PROFILE_LABELS: Record<UserProfile, string> = {
   enfermeiro: 'Enfermeiro Auditor',
   analista: 'Analista de Contas',
   auditor: 'Auditor Geral',
+  gerencial: 'Gerencial',
 };
 
 interface RBACState {
@@ -83,7 +89,6 @@ interface RBACState {
 export const useRBACStore = create<RBACState>()(
   persist(
     (set, get) => ({
-      // Demo: perfil Diretor que vê tudo
       currentProfile: 'diretor',
       
       setProfile: (profile) => set({ currentProfile: profile }),

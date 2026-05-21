@@ -1,63 +1,40 @@
-/**
- * Hook para gerenciar renovação automática de token JWT
- */
-
 import { useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
-import { shouldRenewToken, getTokenExpirationInfo } from '@/utils/jwtGenerator';
 
-/**
- * Hook que verifica periodicamente se o token precisa ser renovado
- * e o renova automaticamente quando necessário
- */
 export const useTokenRenewal = () => {
-  const { accessToken, setAccessToken, logout } = useAuthStore();
+  const { accessToken, refreshSession, getValidAccessToken, logout } = useAuthStore();
 
   useEffect(() => {
-    // Verificar token a cada 5 minutos
-    const interval = setInterval(() => {
-      if (!accessToken) {
-        return;
+    if (!accessToken) return;
+
+    let mounted = true;
+
+    const validateSession = async () => {
+      try {
+        const validToken = await getValidAccessToken();
+        if (mounted && !validToken) {
+          await logout({ remote: false });
+        }
+      } catch (error) {
+        console.warn('Falha ao validar sessão:', error);
+        if (mounted) await logout({ remote: false });
       }
+    };
 
-      const expirationInfo = getTokenExpirationInfo(accessToken);
+    validateSession();
 
-      // Se expirou, fazer logout
-      if (expirationInfo.isExpired) {
-        console.warn('⚠️ Token expirado, fazendo logout...');
-        logout();
-        return;
+    const interval = setInterval(async () => {
+      try {
+        await refreshSession();
+      } catch (error) {
+        console.warn('Falha ao renovar token:', error);
+        await logout({ remote: false });
       }
+    }, 5 * 60 * 1000);
 
-      // Se falta menos de 1 hora, renovar
-      if (shouldRenewToken(accessToken)) {
-        console.log('🔄 Renovando token...');
-        const { generateDemoTokenSync } = require('@/utils/jwtGenerator');
-        const newToken = generateDemoTokenSync(24);
-        setAccessToken(newToken);
-        console.log('✅ Token renovado com sucesso');
-      } else {
-        console.log(`⏰ Token válido por mais ${expirationInfo.remainingHours}h ${expirationInfo.remainingMinutes}min`);
-      }
-    }, 5 * 60 * 1000); // 5 minutos
-
-    // Verificação inicial
-    if (accessToken) {
-      const expirationInfo = getTokenExpirationInfo(accessToken);
-      
-      if (expirationInfo.isExpired) {
-        console.warn('⚠️ Token expirado, fazendo logout...');
-        logout();
-      } else if (shouldRenewToken(accessToken)) {
-        console.log('🔄 Token próximo da expiração, renovando...');
-        const { generateDemoTokenSync } = require('@/utils/jwtGenerator');
-        const newToken = generateDemoTokenSync(24);
-        setAccessToken(newToken);
-        console.log('✅ Token renovado com sucesso');
-      }
-    }
-
-    return () => clearInterval(interval);
-  }, [accessToken, setAccessToken, logout]);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, [accessToken, refreshSession, getValidAccessToken, logout]);
 };
-

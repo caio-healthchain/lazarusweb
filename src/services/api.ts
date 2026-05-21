@@ -160,14 +160,15 @@ const createApiClient = (): AxiosInstance => {
 
   client.interceptors.request.use(
     (config) => {
-      const apiKey = import.meta.env.VITE_API_KEY || "a7f3c8e9d2b1f4a6c5e8d9f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2";
+      const apiKey = import.meta.env.VITE_API_KEY;
+      const { accessToken } = useAuthStore.getState();
+
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
+
       if (apiKey) {
         config.headers['X-API-Key'] = apiKey;
-      } else {
-        const { accessToken } = useAuthStore.getState();
-        if (accessToken) {
-          config.headers.Authorization = `Bearer ${accessToken}`;
-        }
       }
       if (config.data instanceof FormData) {
         delete config.headers['Content-Type'];
@@ -181,13 +182,8 @@ const createApiClient = (): AxiosInstance => {
     (response) => response,
     (error) => {
       if (error.response?.status === 401) {
-        const { user } = useAuthStore.getState();
-        if (user?.id === 'test-admin-123') {
-          console.warn('Demo mode: ignorando 401');
-          return Promise.reject(error);
-        }
         const { logout } = useAuthStore.getState();
-        logout();
+        logout({ remote: false });
         window.location.href = '/login';
       }
       return Promise.reject(error);

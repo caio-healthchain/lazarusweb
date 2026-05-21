@@ -1,15 +1,9 @@
+import axios from 'axios';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { AccountInfo } from '@azure/msal-browser';
-import { UserRole } from '@/config/auth';
-import {
-  generateDemoToken,
-  decodeToken,
-  isTokenExpired,
-  shouldRenewToken,
-} from '@/utils/jwtGenerator';
+import { API_CONFIG, UserRole } from '@/config/auth';
 
-interface User {
+export interface AuthUser {
   id: string;
   name: string;
   email: string;
@@ -17,26 +11,127 @@ interface User {
   avatar?: string;
 }
 
+export interface AuthProfile {
+  id: string;
+  code: string;
+  name: string;
+  description?: string | null;
+  allowedModules?: string[];
+  permissions?: string[];
+}
+
+export interface AuthHospital {
+  id: string;
+  code: string;
+  name: string;
+  subdomain?: string | null;
+  customDomain?: string | null;
+  logoUrl?: string | null;
+  primaryColor?: string | null;
+}
+
+export interface HospitalAccess {
+  hospital: AuthHospital;
+  profile: AuthProfile;
+}
+
+interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn?: number;
+  user: Omit<AuthUser, 'roles'> & { roles?: UserRole[] };
+  hospitals: HospitalAccess[];
+}
+
+interface SelectHospitalResponse {
+  redirectUrl?: string;
+  hospital: AuthHospital;
+  profiles: AuthProfile[];
+  contextToken?: string;
+  accessToken?: string;
+}
+
 interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: User | null;
+  user: AuthUser | null;
   accessToken: string | null;
-  
-  // Actions
+  refreshToken: string | null;
+  hospitals: HospitalAccess[];
+  selectedHospital: AuthHospital | null;
+  selectedProfiles: AuthProfile[];
+  tokenContext: Record<string, unknown> | null;
+
   setAuthenticated: (authenticated: boolean) => void;
   setLoading: (loading: boolean) => void;
-  setUser: (user: User | null) => void;
+  setUser: (user: AuthUser | null) => void;
   setAccessToken: (token: string | null) => void;
-  logout: () => void;
-  
-  // Demo login (async)
-  loginDemo: () => Promise<void>;
-  // Renew token if necessary (demo flow)
-  renewToken: (expiresInHours?: number) => Promise<string | null>;
-  // Returns a valid token, renewing it if needed. Returns null if not authenticated/expired.
+  setRefreshToken: (token: string | null) => void;
+  setHospitals: (hospitals: HospitalAccess[]) => void;
+  setSelectedHospital: (hospital: AuthHospital | null, profiles?: AuthProfile[]) => void;
+  login: (email: string, password: string) => Promise<LoginResponse>;
+  loadAuthenticatedUser: () => Promise<void>;
+  selectHospital: (hospitalId: string) => Promise<SelectHospitalResponse>;
+  refreshSession: () => Promise<string | null>;
+  logout: (options?: { remote?: boolean }) => Promise<void> | void;
   getValidAccessToken: () => Promise<string | null>;
 }
+
+const authEndpoint = (path: string) => `${API_CONFIG.baseUrl}${path}`;
+
+const decodeJwtPayload = (token: string | null): any | null => {
+  if (!token) return null;
+
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return null;
+
+    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(normalizedPayload)
+        .split('')
+        .map((char) => `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`)
+        .join('')
+    );
+
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.warn('Não foi possível decodificar o JWT persistido:', error);
+    return null;
+  }
+};
+
+const isTokenExpired = (token: string | null, leewaySeconds = 30) => {
+  const payload = decodeJwtPayload(token);
+  if (!payload?.exp) return false;
+  return Date.now() >= (payload.exp - leewaySeconds) * 1000;
+};
+
+const shouldRefreshToken = (token: string | null, thresholdSeconds = 60 * 60) => {
+  const payload = decodeJwtPayload(token);
+  if (!payload?.exp) return false;
+  return Date.now() >= (payload.exp - thresholdSeconds) * 1000;
+};
+
+const normalizeRolesFromHospitals = (hospitals: HospitalAccess[] = []): UserRole[] => {
+  const roleSet = new Set<UserRole>();
+
+  hospitals.forEach((entry) => {
+    const profileCode = entry?.profile?.code as UserRole | undefined;
+    if (profileCode) roleSet.add(profileCode);
+  });
+
+  if (roleSet.size === 0) roleSet.add('auditor');
+  return Array.from(roleSet);
+};
+
+const normalizeUser = (user: LoginResponse['user'], hospitals: HospitalAccess[]): AuthUser => ({
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  avatar: user.avatar,
+  roles: user.roles?.length ? user.roles : normalizeRolesFromHospitals(hospitals),
+});
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -45,129 +140,195 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       user: null,
       accessToken: null,
+      refreshToken: null,
+      hospitals: [],
+      selectedHospital: null,
+      selectedProfiles: [],
+      tokenContext: null,
 
       setAuthenticated: (authenticated) => set({ isAuthenticated: authenticated }),
       setLoading: (loading) => set({ isLoading: loading }),
       setUser: (user) => set({ user }),
-      setAccessToken: (token) => set({ accessToken: token }),
+      setAccessToken: (token) => set({ accessToken: token, tokenContext: decodeJwtPayload(token) }),
+      setRefreshToken: (token) => set({ refreshToken: token }),
+      setHospitals: (hospitals) => set({ hospitals }),
+      setSelectedHospital: (hospital, profiles = []) => set({ selectedHospital: hospital, selectedProfiles: profiles }),
 
-      logout: () => set({
-        isAuthenticated: false,
-        user: null,
-        accessToken: null,
-      }),
+      login: async (email, password) => {
+        set({ isLoading: true });
 
-      loginDemo: async () => {
-        const demoUser: User = {
-          id: 'test-admin-123',
-          name: 'Dr. João Silva',
-          email: 'admin@lazarus.com',
-          roles: ['admin', 'auditor'],
-          avatar: undefined,
-        };
+        try {
+          const response = await axios.post<LoginResponse>(authEndpoint(API_CONFIG.endpoints.auth.login), {
+            email: email.trim().toLowerCase(),
+            password,
+          });
 
-        // Gerar token com HMAC-SHA256 real
-        const demoToken = await generateDemoToken(24); // Token válido por 24 horas
+          const { accessToken, refreshToken, user, hospitals } = response.data;
 
-        set({
-          isAuthenticated: true,
-          user: demoUser,
-          accessToken: demoToken,
-          isLoading: false,
+          set({
+            isAuthenticated: true,
+            user: normalizeUser(user, hospitals),
+            accessToken,
+            refreshToken,
+            hospitals,
+            selectedHospital: null,
+            selectedProfiles: [],
+            tokenContext: decodeJwtPayload(accessToken),
+            isLoading: false,
+          });
+
+          return response.data;
+        } catch (error) {
+          set({ isLoading: false });
+          throw error;
+        }
+      },
+
+      loadAuthenticatedUser: async () => {
+        const token = await get().getValidAccessToken();
+        if (!token) return;
+
+        const response = await axios.get(authEndpoint(API_CONFIG.endpoints.auth.me), {
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log('✅ Login demo realizado com sucesso');
-        console.log('🔐 Token JWT válido gerado com HMAC-SHA256');
+        const hospitals = response.data?.hospitals || [];
+        const currentUser = response.data?.user;
+        const tokenContext = response.data?.tokenContext || decodeJwtPayload(token);
+
+        set({
+          user: currentUser ? normalizeUser(currentUser, hospitals) : get().user,
+          hospitals,
+          tokenContext,
+          isAuthenticated: true,
+        });
       },
 
-      // Renova o token demo se necessário (apenas fluxo demo)
-      renewToken: async (expiresInHours: number = 24) => {
-        const token = get().accessToken;
-        if (!token) return null;
+      selectHospital: async (hospitalId) => {
+        const token = await get().getValidAccessToken();
+        if (!token) throw new Error('Sessão expirada. Faça login novamente.');
 
-        // Se já expirou, fazer logout
-        if (isTokenExpired(token)) {
-          console.warn('Token expirado — realizando logout');
-          get().logout();
+        const response = await axios.post<SelectHospitalResponse>(
+          authEndpoint(API_CONFIG.endpoints.auth.selectHospital),
+          { hospitalId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const { hospital, profiles, contextToken, accessToken } = response.data;
+        const tokenToPersist = contextToken || accessToken || token;
+
+        set({
+          accessToken: tokenToPersist,
+          selectedHospital: hospital,
+          selectedProfiles: profiles || [],
+          tokenContext: decodeJwtPayload(tokenToPersist),
+          isAuthenticated: true,
+        });
+
+        return response.data;
+      },
+
+      refreshSession: async () => {
+        const refreshToken = get().refreshToken;
+        if (!refreshToken || isTokenExpired(refreshToken, 0)) {
+          get().logout({ remote: false });
           return null;
         }
 
-        // Renovar apenas se estiver perto de expirar
-        if (!shouldRenewToken(token)) {
-          return token;
-        }
+        try {
+          const response = await axios.post(authEndpoint(API_CONFIG.endpoints.auth.refresh), { refreshToken });
+          const newAccessToken = response.data?.accessToken;
+          const newRefreshToken = response.data?.refreshToken || refreshToken;
 
-        const newToken = await generateDemoToken(expiresInHours);
-        set({ accessToken: newToken });
-        console.log('🔁 Token renovado com sucesso');
-        return newToken;
+          if (!newAccessToken) throw new Error('Refresh sem accessToken');
+
+          set({
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+            tokenContext: decodeJwtPayload(newAccessToken),
+            isAuthenticated: true,
+          });
+
+          return newAccessToken;
+        } catch (error) {
+          console.warn('Falha ao renovar sessão:', error);
+          get().logout({ remote: false });
+          return null;
+        }
       },
 
-      // Retorna um token válido: renova automaticamente se necessário.
+      logout: async (options = { remote: true }) => {
+        const token = get().accessToken;
+
+        if (options.remote && token && !isTokenExpired(token, 0)) {
+          try {
+            await axios.post(
+              authEndpoint(API_CONFIG.endpoints.auth.logout),
+              {},
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+          } catch (error) {
+            console.warn('Logout remoto não confirmado; limpando sessão local:', error);
+          }
+        }
+
+        set({
+          isAuthenticated: false,
+          user: null,
+          accessToken: null,
+          refreshToken: null,
+          hospitals: [],
+          selectedHospital: null,
+          selectedProfiles: [],
+          tokenContext: null,
+          isLoading: false,
+        });
+      },
+
       getValidAccessToken: async () => {
         const token = get().accessToken;
+
         if (!token) return null;
 
         if (isTokenExpired(token)) {
-          console.warn('Token expirado — realizando logout');
-          get().logout();
-          return null;
+          return get().refreshSession();
         }
 
-        if (shouldRenewToken(token)) {
-          return await get().renewToken();
+        if (shouldRefreshToken(token)) {
+          return get().refreshSession();
         }
 
         return token;
       },
     }),
     {
-      name: 'lazarus-auth-storage', // Nome único no localStorage
+      name: 'lazarus-auth-storage',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,
         user: state.user,
         accessToken: state.accessToken,
-        // Não persistir isLoading
+        refreshToken: state.refreshToken,
+        hospitals: state.hospitals,
+        selectedHospital: state.selectedHospital,
+        selectedProfiles: state.selectedProfiles,
+        tokenContext: state.tokenContext,
       }),
     }
   )
 );
 
-// --- Hydration / validação inicial do token persistido ---
-// Ao carregar o app, verificar se o token armazenado ainda é válido. Se estiver expirado,
-// limpa o storage para evitar estado inválido.
 try {
   const raw = localStorage.getItem('lazarus-auth-storage');
   if (raw) {
     const parsed = JSON.parse(raw) as any;
-    const token: string | undefined = parsed?.state?.accessToken ?? parsed?.accessToken;
-    if (token) {
-      if (isTokenExpired(token)) {
-        console.warn('Token persistido expirado — limpando storage');
-        localStorage.removeItem('lazarus-auth-storage');
-      } else {
-        // preenche dados mínimos do usuário a partir do payload se não existir
-        const payload = decodeToken(token);
-        if (payload) {
-          const store = useAuthStore.getState();
-          if (!store.user) {
-            useAuthStore.setState({
-              isAuthenticated: true,
-              user: {
-                id: payload.userId,
-                name: payload.email.split('@')[0],
-                email: payload.email,
-                roles: [payload.role as UserRole],
-              },
-              accessToken: token,
-            });
-          }
-        }
-      }
+    const token: string | undefined = parsed?.state?.accessToken;
+    const refreshToken: string | undefined = parsed?.state?.refreshToken;
+
+    if ((token && isTokenExpired(token, 0)) && (!refreshToken || isTokenExpired(refreshToken, 0))) {
+      localStorage.removeItem('lazarus-auth-storage');
     }
   }
-} catch (e) {
-  console.error('Erro ao validar token persistido:', e);
+} catch (error) {
+  console.error('Erro ao validar sessão persistida:', error);
 }
-

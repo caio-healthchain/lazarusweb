@@ -1,115 +1,98 @@
-import { useState, useEffect } from 'react';
+import { ReactNode, useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/store/authStore';
+import { AuthHospital, AuthProfile, HospitalAccess, useAuthStore } from '@/store/authStore';
+import { useRBACStore, UserProfile } from '@/store/rbacStore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Hospital, 
-  ArrowRight, 
+import {
+  Hospital,
+  ArrowRight,
   Shield,
   Building2,
   Loader2,
   LogOut,
-  Activity
+  Activity,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import axios from 'axios';
-import { API_CONFIG } from '@/config/auth';
 
-interface Profile {
-  id: string;
-  code: string;
-  name: string;
-  description: string;
+interface HospitalWithProfiles extends AuthHospital {
+  profiles: AuthProfile[];
 }
 
-interface HospitalWithProfiles {
-  id: string;
-  code: string;
-  name: string;
-  subdomain: string;
-  customDomain?: string;
-  logoUrl?: string;
-  primaryColor?: string;
-  profiles: Profile[];
-}
+const SUPPORTED_PROFILES: UserProfile[] = ['diretor', 'medico', 'enfermeiro', 'analista', 'auditor', 'gerencial', 'admin'];
 
-// DADOS MOCKADOS PARA DEMO
-const MOCK_HOSPITALS: HospitalWithProfiles[] = [
-  {
-    id: 'hospital-sagrada-familia',
-    code: 'hsf',
-    name: 'Hospital Sagrada Familia',
-    subdomain: 'sagrada-familia',
-    customDomain: 'lazarus.healthchainsolutions.com.br',
-    logoUrl: 'https://via.placeholder.com/200x100?text=Sagrada+Familia',
-    primaryColor: '#10B981',
-    profiles: [
-      { id: 'profile-auditor', code: 'auditor', name: 'Auditor', description: 'Auditoria de guias' },
-      { id: 'profile-analista', code: 'analista', name: 'Analista', description: 'Analise de documentacao' },
-      { id: 'profile-gerencial', code: 'gerencial', name: 'Gerencial', description: 'Dashboard executivo' },
-    ],
-  },
-];
+const toRbacProfile = (profiles: AuthProfile[]): UserProfile => {
+  const codes = profiles.map((profile) => profile.code?.toLowerCase()).filter(Boolean);
+  const supported = codes.find((code): code is UserProfile => SUPPORTED_PROFILES.includes(code as UserProfile));
+  return supported || 'auditor';
+};
+
+const groupHospitals = (entries: HospitalAccess[]): HospitalWithProfiles[] => {
+  const grouped = new Map<string, HospitalWithProfiles>();
+
+  entries.forEach((entry) => {
+    if (!entry?.hospital?.id) return;
+
+    const current = grouped.get(entry.hospital.id) || { ...entry.hospital, profiles: [] };
+    const alreadyIncluded = current.profiles.some((profile) => profile.id === entry.profile?.id);
+
+    if (entry.profile && !alreadyIncluded) {
+      current.profiles.push(entry.profile);
+    }
+
+    grouped.set(entry.hospital.id, current);
+  });
+
+  return Array.from(grouped.values());
+};
 
 const HospitalSelection = () => {
   const navigate = useNavigate();
-  const { user, accessToken, logout } = useAuthStore();
-  const [hospitals, setHospitals] = useState<HospitalWithProfiles[]>(MOCK_HOSPITALS);
+  const {
+    user,
+    hospitals: hospitalAccesses,
+    loadAuthenticatedUser,
+    selectHospital,
+    logout,
+  } = useAuthStore();
+  const { setProfile, getDefaultRoute } = useRBACStore();
   const [loading, setLoading] = useState(true);
   const [selecting, setSelecting] = useState<string | null>(null);
 
   useEffect(() => {
-    loadHospitals();
-  }, []);
-
-  const loadHospitals = async () => {
-    try {
-      setLoading(true);
-
-      const response = await axios.get(`${API_CONFIG.baseUrl}/users/users/me/hospitals`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      setHospitals(response.data);
-    } catch (error: any) {
-      console.error('Erro ao carregar hospitais:', error);
-      
-      // FALLBACK PARA DEMO: Se falhar, usar dados mockados
-      console.log('Demo Mode: Usando dados mockados de hospitais');
-      setHospitals(MOCK_HOSPITALS);
-      
-      // Se erro de autenticacao, fazer logout
-      if (error.response?.status === 401) {
-        logout();
-        navigate('/login');
+    const loadHospitals = async () => {
+      try {
+        setLoading(true);
+        await loadAuthenticatedUser();
+      } catch (error: any) {
+        console.error('Erro ao carregar hospitais:', error);
+        toast.error(error?.response?.data?.message || 'Não foi possível carregar seus hospitais. Faça login novamente.');
+        await logout({ remote: false });
+        navigate('/login', { replace: true });
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  // Função para obter ícone e cor baseado no código do hospital
+    loadHospitals();
+  }, [loadAuthenticatedUser, logout, navigate]);
+
+  const hospitals = useMemo(() => groupHospitals(hospitalAccesses), [hospitalAccesses]);
+
   const getHospitalIcon = (code: string) => {
-    const icons: Record<string, { icon: React.ReactNode; color: string }> = {
+    const icons: Record<string, { icon: ReactNode; color: string }> = {
       h9j: {
         icon: <Activity className="h-8 w-8 text-white" />,
-        color: '#3B82F6', // Azul
+        color: '#3B82F6',
       },
       hsl: {
         icon: <Hospital className="h-8 w-8 text-white" />,
-        color: '#10B981', // Verde
+        color: '#10B981',
       },
       hsf: {
         icon: <Hospital className="h-8 w-8 text-white" />,
-        color: '#10B981', // Verde
-      },
-      demo: {
-        icon: <Shield className="h-8 w-8 text-white" />,
-        color: '#8B5CF6', // Roxo
+        color: '#10B981',
       },
     };
 
@@ -120,42 +103,24 @@ const HospitalSelection = () => {
     try {
       setSelecting(hospital.id);
 
-      const response = await axios.post(
-        `${API_CONFIG.baseUrl}/users/users/auth/select-hospital`,
-        { hospitalId: hospital.id },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const response = await selectHospital(hospital.id);
+      const selectedProfiles = response.profiles?.length ? response.profiles : hospital.profiles;
+      const rbacProfile = toRbacProfile(selectedProfiles);
 
-      const { redirectUrl, accessToken: newToken } = response.data;
-
-      // Atualizar token no store
-      useAuthStore.getState().setAccessToken(newToken);
-
-      toast.success(`Acessando ${hospital.name}...`);
-
-      // Temporariamente, redirecionar todos para a mesma URL
-      // TODO: Implementar subdomínios quando os hospitais estiverem configurados
-      window.location.href = '/central-contas';
+      setProfile(rbacProfile);
+      toast.success(`Acessando ${response.hospital?.name || hospital.name}...`);
+      navigate(getDefaultRoute(), { replace: true });
     } catch (error: any) {
       console.error('Erro ao selecionar hospital:', error);
-      
-      // FALLBACK PARA DEMO: Se falhar, redirecionar mesmo assim
-      console.log('Demo Mode: Redirecionando mesmo com erro');
-      toast.success(`Acessando ${hospital.name}...`);
-      setTimeout(() => {
-        window.location.href = '/central-contas';
-      }, 1000);
+      toast.error(error?.response?.data?.message || 'Você não possui acesso ativo a este hospital.');
+    } finally {
       setSelecting(null);
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
     toast.success('Logout realizado com sucesso');
   };
 
@@ -180,12 +145,12 @@ const HospitalSelection = () => {
             </div>
             <CardTitle className="text-2xl text-white">Sem Acesso</CardTitle>
             <CardDescription className="text-blue-100">
-              Você não possui acesso a nenhum hospital no momento.
+              Você não possui acesso ativo a nenhum hospital no momento.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-blue-200 text-sm text-center mb-6">
-              Entre em contato com o administrador do sistema para solicitar acesso.
+              Entre em contato com o administrador do sistema para solicitar vínculo a um hospital e perfil funcional.
             </p>
             <Button
               onClick={handleLogout}
@@ -204,11 +169,12 @@ const HospitalSelection = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="flex items-center justify-between mb-12">
           <div>
             <h1 className="text-4xl font-bold text-white mb-2">Selecione um Hospital</h1>
-            <p className="text-blue-200">Escolha o hospital para acessar a plataforma</p>
+            <p className="text-blue-200">
+              {user?.name ? `${user.name}, escolha o hospital para acessar a plataforma` : 'Escolha o hospital para acessar a plataforma'}
+            </p>
           </div>
           <Button
             onClick={handleLogout}
@@ -220,7 +186,6 @@ const HospitalSelection = () => {
           </Button>
         </div>
 
-        {/* Hospitals Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {hospitals.map((hospital) => {
             const { icon, color } = getHospitalIcon(hospital.code);
@@ -232,18 +197,17 @@ const HospitalSelection = () => {
                 <CardHeader>
                   <div
                     className="w-16 h-16 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
-                    style={{ backgroundColor: color + '20', borderColor: color, borderWidth: '2px' }}
+                    style={{ backgroundColor: `${color}20`, borderColor: color, borderWidth: '2px' }}
                   >
                     {icon}
                   </div>
                   <CardTitle className="text-xl text-white">{hospital.name}</CardTitle>
                   <CardDescription className="text-blue-200">
-                    {hospital.profiles.length} módulos disponíveis
+                    {hospital.profiles.length} módulo{hospital.profiles.length === 1 ? '' : 's'} disponível{hospital.profiles.length === 1 ? '' : 'is'}
                   </CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-4">
-                  {/* Perfis */}
                   <div className="space-y-2">
                     <p className="text-xs font-semibold text-blue-300 uppercase">Módulos</p>
                     <div className="flex flex-wrap gap-2">
@@ -259,7 +223,6 @@ const HospitalSelection = () => {
                     </div>
                   </div>
 
-                  {/* Botão de Acesso */}
                   <Button
                     onClick={() => handleSelectHospital(hospital)}
                     disabled={selecting === hospital.id}
