@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { AUTH_CONTINGENCY } from '@/config/auth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -28,7 +29,7 @@ import { toast } from 'sonner';
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isLoading, login } = useAuthStore();
+  const { isAuthenticated, isLoading, login, loginWithMock } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +68,22 @@ const Login = () => {
       const message = backendMessage || 'Não foi possível autenticar. Verifique suas credenciais e tente novamente.';
       setError(message);
       toast.error('Falha no login');
+    }
+  };
+
+  const handleMockLogin = async () => {
+    setError(null);
+
+    try {
+      const response = await loginWithMock();
+      toast.success(`Contingência ativada. Bem-vindo, ${response.user.name}!`);
+
+      const redirectTo = (location.state as any)?.from?.pathname || '/select-hospital';
+      navigate(redirectTo === '/login' ? '/select-hospital' : redirectTo, { replace: true });
+    } catch (error: any) {
+      const message = error?.message || 'Não foi possível ativar o login de contingência.';
+      setError(message);
+      toast.error('Falha no login de contingência');
     }
   };
 
@@ -182,6 +199,14 @@ const Login = () => {
               </CardHeader>
 
               <CardContent className="space-y-6">
+                {AUTH_CONTINGENCY.mockLoginEnabled && (
+                  <Alert className="bg-amber-500/10 border-amber-400/30">
+                    <AlertDescription className="text-amber-100">
+                      {AUTH_CONTINGENCY.banner}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 {error && (
                   <Alert variant="destructive" className="bg-red-500/10 border-red-500/20">
                     <AlertDescription className="text-red-200">{error}</AlertDescription>
@@ -239,6 +264,24 @@ const Login = () => {
                     Entrar na Plataforma
                   </Button>
                 </form>
+
+                {AUTH_CONTINGENCY.mockLoginEnabled && (
+                  <Button
+                    type="button"
+                    onClick={handleMockLogin}
+                    disabled={isLoading}
+                    variant="outline"
+                    className="w-full bg-amber-500/10 border-amber-300/30 text-amber-100 hover:bg-amber-500/20 hover:text-white h-12 text-base font-medium"
+                    size="lg"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="mr-3 h-5 w-5 animate-spin" />
+                    ) : (
+                      <Lock className="mr-3 h-5 w-5" />
+                    )}
+                    Acessar em modo contingência
+                  </Button>
+                )}
 
                 <Dialog open={showAccessForm} onOpenChange={setShowAccessForm}>
                   <DialogTrigger asChild>

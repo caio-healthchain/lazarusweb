@@ -18,6 +18,18 @@ export const loginRequest: PopupRequest = {
   scopes: ["User.Read", "openid", "profile"],
 };
 
+// Modo temporário de autenticação.
+// Durante o rollout da F02, o frontend pode operar em contingência mockada até que
+// a coluna password_hash e o deploy do ms-users estejam disponíveis no ambiente alvo.
+// Para voltar ao fluxo real, configurar VITE_AUTH_MODE=real no build/deploy.
+export const AUTH_MODE = (import.meta.env.VITE_AUTH_MODE || 'mock') as 'real' | 'mock';
+
+export const AUTH_CONTINGENCY = {
+  mode: AUTH_MODE,
+  mockLoginEnabled: AUTH_MODE === 'mock',
+  banner: 'Contingência temporária: login mockado ativo até conclusão do rollout do IAM.',
+} as const;
+
 // Configuração da API
 export const API_CONFIG = {
   baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://lazarusapi.azure-api.net',
