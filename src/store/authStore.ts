@@ -77,7 +77,7 @@ interface AuthState {
   getValidAccessToken: () => Promise<string | null>;
 }
 
-const authEndpoint = (path: string) => `${API_CONFIG.baseUrl}${path}`;
+const authEndpoint = (path: string) => `${API_CONFIG.authBaseUrl}${path}`;
 
 const decodeJwtPayload = (token: string | null): any | null => {
   if (!token) return null;

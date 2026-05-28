@@ -24,7 +24,10 @@ export const AUTH_MODE = 'real' as const;
 
 // Configuração da API
 export const API_CONFIG = {
+  // Gateway geral dos demais microsserviços.
   baseUrl: import.meta.env.VITE_API_BASE_URL || 'https://lazarusapi.azure-api.net',
+  // Endpoint direto do ms-users no Azure Container Apps para o fluxo oficial de IAM.
+  authBaseUrl: import.meta.env.VITE_AUTH_API_BASE_URL || 'https://lazarus-users.proudmeadow-1e583df1.centralus.azurecontainerapps.io',
   endpoints: {
     // IAM custom - ms-users
     auth: {
