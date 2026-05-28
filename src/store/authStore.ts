@@ -1,9 +1,7 @@
 import axios from 'axios';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { API_CONFIG, AUTH_CONTINGENCY, UserRole } from '@/config/auth';
-import { MOCK_HOSPITALS } from '@/services/mockData';
-import { generateDemoToken } from '@/utils/jwtGenerator';
+import { API_CONFIG, UserRole } from '@/config/auth';
 
 export interface AuthUser {
   id: string;
@@ -72,7 +70,6 @@ interface AuthState {
   setHospitals: (hospitals: HospitalAccess[]) => void;
   setSelectedHospital: (hospital: AuthHospital | null, profiles?: AuthProfile[]) => void;
   login: (email: string, password: string) => Promise<LoginResponse>;
-  loginWithMock: () => Promise<LoginResponse>;
   loadAuthenticatedUser: () => Promise<void>;
   selectHospital: (hospitalId: string) => Promise<SelectHospitalResponse>;
   refreshSession: () => Promise<string | null>;
@@ -136,48 +133,6 @@ const normalizeUser = (user: LoginResponse['user'], hospitals: HospitalAccess[])
   roles: user.roles?.length ? user.roles : normalizeRolesFromHospitals(hospitals),
 });
 
-const buildMockHospitalAccesses = (): HospitalAccess[] =>
-  MOCK_HOSPITALS.flatMap((hospital) =>
-    hospital.profiles.map((profile) => ({
-      hospital: {
-        id: hospital.id,
-        code: hospital.code,
-        name: hospital.name,
-        subdomain: hospital.subdomain,
-        customDomain: hospital.customDomain,
-        logoUrl: hospital.logoUrl,
-        primaryColor: hospital.primaryColor,
-      },
-      profile: {
-        id: profile.id,
-        code: profile.code,
-        name: profile.name,
-        description: profile.description,
-        allowedModules: [],
-        permissions: [],
-      },
-    }))
-  );
-
-const buildMockLoginResponse = async (): Promise<LoginResponse> => {
-  const hospitals = buildMockHospitalAccesses();
-  const accessToken = await generateDemoToken(24);
-  const refreshToken = await generateDemoToken(48);
-
-  return {
-    accessToken,
-    refreshToken,
-    expiresIn: 24 * 60 * 60,
-    user: {
-      id: 'test-admin-123',
-      name: 'Usuário Demo Lazarus',
-      email: 'admin@lazarus.com',
-      roles: ['admin', 'auditor', 'analista', 'gerencial'],
-    },
-    hospitals,
-  };
-};
-
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -229,57 +184,10 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      loginWithMock: async () => {
-        if (!AUTH_CONTINGENCY.mockLoginEnabled) {
-          throw new Error('Login mockado desabilitado. Configure VITE_AUTH_MODE=mock para usar a contingência.');
-        }
-
-        set({ isLoading: true });
-
-        try {
-          const response = await buildMockLoginResponse();
-          const { accessToken, refreshToken, user, hospitals } = response;
-
-          set({
-            isAuthenticated: true,
-            user: normalizeUser(user, hospitals),
-            accessToken,
-            refreshToken,
-            hospitals,
-            selectedHospital: null,
-            selectedProfiles: [],
-            tokenContext: decodeJwtPayload(accessToken),
-            isLoading: false,
-          });
-
-          return response;
-        } catch (error) {
-          set({ isLoading: false });
-          throw error;
-        }
-      },
-
       loadAuthenticatedUser: async () => {
         const token = await get().getValidAccessToken();
         if (!token) return;
 
-        if (AUTH_CONTINGENCY.mockLoginEnabled) {
-          const hospitals = get().hospitals.length ? get().hospitals : buildMockHospitalAccesses();
-          const currentUser = get().user || {
-            id: 'test-admin-123',
-            name: 'Usuário Demo Lazarus',
-            email: 'admin@lazarus.com',
-            roles: normalizeRolesFromHospitals(hospitals),
-          };
-
-          set({
-            user: currentUser,
-            hospitals,
-            tokenContext: decodeJwtPayload(token),
-            isAuthenticated: true,
-          });
-          return;
-        }
 
         const response = await axios.get(authEndpoint(API_CONFIG.endpoints.auth.me), {
           headers: { Authorization: `Bearer ${token}` },
@@ -301,29 +209,6 @@ export const useAuthStore = create<AuthState>()(
         const token = await get().getValidAccessToken();
         if (!token) throw new Error('Sessão expirada. Faça login novamente.');
 
-        if (AUTH_CONTINGENCY.mockLoginEnabled) {
-          const entries = get().hospitals.length ? get().hospitals : buildMockHospitalAccesses();
-          const selectedEntries = entries.filter((entry) => entry.hospital.id === hospitalId);
-          const firstEntry = selectedEntries[0];
-
-          if (!firstEntry) throw new Error('Hospital não encontrado na contingência mockada.');
-
-          const response: SelectHospitalResponse = {
-            hospital: firstEntry.hospital,
-            profiles: selectedEntries.map((entry) => entry.profile),
-            contextToken: token,
-            accessToken: token,
-          };
-
-          set({
-            selectedHospital: response.hospital,
-            selectedProfiles: response.profiles,
-            tokenContext: decodeJwtPayload(token),
-            isAuthenticated: true,
-          });
-
-          return response;
-        }
 
         const response = await axios.post<SelectHospitalResponse>(
           authEndpoint(API_CONFIG.endpoints.auth.selectHospital),
@@ -352,19 +237,6 @@ export const useAuthStore = create<AuthState>()(
           return null;
         }
 
-        if (AUTH_CONTINGENCY.mockLoginEnabled) {
-          const newAccessToken = await generateDemoToken(24);
-          const newRefreshToken = await generateDemoToken(48);
-
-          set({
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-            tokenContext: decodeJwtPayload(newAccessToken),
-            isAuthenticated: true,
-          });
-
-          return newAccessToken;
-        }
 
         try {
           const response = await axios.post(authEndpoint(API_CONFIG.endpoints.auth.refresh), { refreshToken });
@@ -391,7 +263,7 @@ export const useAuthStore = create<AuthState>()(
       logout: async (options = { remote: true }) => {
         const token = get().accessToken;
 
-        if (options.remote && token && !isTokenExpired(token, 0) && !AUTH_CONTINGENCY.mockLoginEnabled) {
+        if (options.remote && token && !isTokenExpired(token, 0)) {
           try {
             await axios.post(
               authEndpoint(API_CONFIG.endpoints.auth.logout),
