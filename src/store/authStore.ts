@@ -69,7 +69,7 @@ interface AuthState {
   setRefreshToken: (token: string | null) => void;
   setHospitals: (hospitals: HospitalAccess[]) => void;
   setSelectedHospital: (hospital: AuthHospital | null, profiles?: AuthProfile[]) => void;
-  login: (email: string, password: string) => Promise<LoginResponse>;
+  login: (identifier: string, password: string) => Promise<LoginResponse>;
   loadAuthenticatedUser: () => Promise<void>;
   selectHospital: (hospitalId: string) => Promise<SelectHospitalResponse>;
   refreshSession: () => Promise<string | null>;
@@ -175,12 +175,12 @@ export const useAuthStore = create<AuthState>()(
       setHospitals: (hospitals) => set({ hospitals }),
       setSelectedHospital: (hospital, profiles = []) => set({ selectedHospital: hospital, selectedProfiles: profiles }),
 
-      login: async (email, password) => {
+      login: async (identifier, password) => {
         set({ isLoading: true });
 
         try {
           const response = await axios.post<LoginResponse>(authEndpoint(API_CONFIG.endpoints.auth.login), {
-            email: email.trim().toLowerCase(),
+            email: identifier.trim().toLowerCase(),
             password,
           });
 

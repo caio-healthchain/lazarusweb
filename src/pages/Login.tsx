@@ -29,7 +29,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, isLoading, login } = useAuthStore();
-  const [email, setEmail] = useState('');
+  const [loginIdentifier, setLoginIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [showAccessForm, setShowAccessForm] = useState(false);
@@ -51,13 +51,13 @@ const Login = () => {
     event.preventDefault();
     setError(null);
 
-    if (!email.trim() || !password) {
-      setError('Informe e-mail e senha para acessar a plataforma.');
+    if (!loginIdentifier.trim() || !password) {
+      setError('Informe usuário ou e-mail e senha para acessar a plataforma.');
       return;
     }
 
     try {
-      const response = await login(email, password);
+      const response = await login(loginIdentifier, password);
       toast.success(`Bem-vindo, ${response.user.name}!`);
 
       const redirectTo = (location.state as any)?.from?.pathname || '/select-hospital';
@@ -177,7 +177,7 @@ const Login = () => {
                 </div>
                 <CardTitle className="text-2xl font-bold text-white">Acesso Seguro</CardTitle>
                 <CardDescription className="text-blue-100">
-                  Entre com seu e-mail corporativo e senha Lazarus
+                  Entre com seu usuário ou e-mail corporativo e senha Lazarus
                 </CardDescription>
               </CardHeader>
 
@@ -190,16 +190,17 @@ const Login = () => {
 
                 <form onSubmit={handleCustomLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-blue-100">E-mail</Label>
+                    <Label htmlFor="loginIdentifier" className="text-blue-100">Usuário ou e-mail</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-5 w-5 text-blue-200/70" />
                       <Input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(event) => setEmail(event.target.value)}
-                        autoComplete="email"
-                        placeholder="voce@hospital.com.br"
+                        id="loginIdentifier"
+                        type="text"
+                        inputMode="email"
+                        value={loginIdentifier}
+                        onChange={(event) => setLoginIdentifier(event.target.value)}
+                        autoComplete="username"
+                        placeholder="caio.amaral ou voce@hospital.com.br"
                         className="h-12 pl-11 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 focus-visible:ring-blue-300"
                         disabled={isLoading}
                         required
