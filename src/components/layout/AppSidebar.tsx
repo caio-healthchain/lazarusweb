@@ -35,6 +35,7 @@ import {
   Brain,
   UserCircle,
   LockKeyhole,
+  BookOpenCheck,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -106,6 +107,14 @@ const GESTAO_ITEMS: NavItem[] = [
     icon: Building2,
     module: 'backoffice',
     aiHint: 'Contratos, fornecedores e recomendações',
+  },
+  {
+    title: 'Terminologias',
+    url: '/terminologias',
+    icon: BookOpenCheck,
+    module: 'terminologias',
+    badge: 'novo',
+    aiHint: 'Catálogo canônico, códigos oficiais e aliases de auditoria',
   },
   {
     title: 'Painel Gerencial',

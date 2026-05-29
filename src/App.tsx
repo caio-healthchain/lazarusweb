@@ -38,6 +38,7 @@ import FrenteMedicaDetails from './pages/FrenteMedicaDetails';
 import Glosas from './pages/Glosas';
 import GlosaDetails from './pages/GlosaDetails';
 import Backoffice from './pages/Backoffice';
+import Terminologies from './pages/Terminologies';
 
 // Components
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -136,6 +137,11 @@ const AppContent = () => {
         {/* Backoffice */}
         <Route path="/backoffice" element={
           <ProtectedPage module="backoffice"><Backoffice /></ProtectedPage>
+        } />
+
+        {/* Terminologias */}
+        <Route path="/terminologias" element={
+          <ProtectedPage module="terminologias"><Terminologies /></ProtectedPage>
         } />
 
         {/* Painel Gerencial */}

@@ -19,6 +19,7 @@ export type AppModule =
   | 'frente-medica'
   | 'glosas'
   | 'backoffice'
+  | 'terminologias'
   | 'gerencial'
   | 'gerencial-chat'
   | 'auditor-legado'
@@ -28,12 +29,12 @@ export type AppModule =
 const PROFILE_PERMISSIONS: Record<UserProfile, AppModule[]> = {
   diretor: [
     'central-contas', 'frente-administrativa', 'frente-enfermagem', 
-    'frente-medica', 'glosas', 'backoffice', 'gerencial', 'gerencial-chat',
+    'frente-medica', 'glosas', 'backoffice', 'terminologias', 'gerencial', 'gerencial-chat',
     'auditor-legado', 'analista-legado'
   ],
   admin: [
     'central-contas', 'frente-administrativa', 'frente-enfermagem', 
-    'frente-medica', 'glosas', 'backoffice', 'gerencial', 'gerencial-chat',
+    'frente-medica', 'glosas', 'backoffice', 'terminologias', 'gerencial', 'gerencial-chat',
     'auditor-legado', 'analista-legado'
   ],
   medico: [
@@ -48,7 +49,7 @@ const PROFILE_PERMISSIONS: Record<UserProfile, AppModule[]> = {
   ],
   auditor: [
     'central-contas', 'frente-administrativa', 'frente-enfermagem', 
-    'frente-medica', 'glosas', 'backoffice', 'gerencial', 'gerencial-chat',
+    'frente-medica', 'glosas', 'backoffice', 'terminologias', 'gerencial', 'gerencial-chat',
     'auditor-legado', 'analista-legado'
   ],
   gerencial: [

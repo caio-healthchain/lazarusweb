@@ -16,7 +16,8 @@ import {
   Stethoscope,
   Scale,
   Settings,
-  Package
+  Package,
+  BookOpenCheck
 } from 'lucide-react';
 
 const ModuleSelection = () => {
@@ -117,6 +118,22 @@ const ModuleSelection = () => {
         'Análise de custos'
       ],
       route: '/backoffice',
+      available: true,
+      highlight: false
+    },
+    {
+      id: 'terminologias',
+      title: 'Terminologias',
+      description: 'Catálogo canônico para códigos oficiais, aliases e saneamento semântico',
+      icon: BookOpenCheck,
+      color: 'bg-indigo-700',
+      features: [
+        'Catálogo canônico',
+        'Sistemas TUSS, CBHPM e internos',
+        'Aliases para guias e contas',
+        'Integração tenant-aware'
+      ],
+      route: '/terminologias',
       available: true,
       highlight: false
     }
