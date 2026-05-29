@@ -1,43 +1,48 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { MsalProvider } from "@azure/msal-react";
-import { PublicClientApplication } from "@azure/msal-browser";
-import { msalConfig } from "@/config/auth";
-import { useTokenRenewal } from "@/hooks/useTokenRenewal";
+import { Toaster } from '@/components/ui/toaster';
+import { Toaster as Sonner } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { MsalProvider } from '@azure/msal-react';
+import { PublicClientApplication } from '@azure/msal-browser';
+import { msalConfig } from '@/config/auth';
+import { useTokenRenewal } from '@/hooks/useTokenRenewal';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { AppModule, UserProfile } from '@/store/rbacStore';
 
 // Pages - Original
-import Login from "./pages/Login";
-import HospitalSelection from "./pages/HospitalSelection";
-import ManagerialDashboard from "./pages/ManagerialDashboard";
-import ManagerialChat from "./pages/ManagerialChat";
-import NewAudit from "./pages/NewAudit";
-import Audits from "./pages/Audits";
-import GuiaDetails from "./pages/GuiaDetails";
-import { Contracts } from "./pages/Contracts";
-import { ContractDetailsNew } from "./pages/ContractDetailsNew";
-import TMIReport from "./pages/TMIReport";
-import NotFound from "./pages/NotFound";
-import Analista from "./pages/Analista";
-import AnalistaDetails from "./pages/AnalistaDetails";
+import Login from './pages/Login';
+import HospitalSelection from './pages/HospitalSelection';
+import ManagerialDashboard from './pages/ManagerialDashboard';
+import ManagerialChat from './pages/ManagerialChat';
+import NewAudit from './pages/NewAudit';
+import Audits from './pages/Audits';
+import GuiaDetails from './pages/GuiaDetails';
+import { Contracts } from './pages/Contracts';
+import { ContractDetailsNew } from './pages/ContractDetailsNew';
+import TMIReport from './pages/TMIReport';
+import NotFound from './pages/NotFound';
+import Analista from './pages/Analista';
+import AnalistaDetails from './pages/AnalistaDetails';
+import Perfil from './pages/Perfil';
+import PapeisAdmin from './pages/admin/PapeisAdmin';
 
 // Pages - Workflow (Novas)
-import ControlTower from "./pages/ControlTower";
-import FrenteAdministrativa from "./pages/FrenteAdministrativa";
-import FrenteAdministrativaDetails from "./pages/FrenteAdministrativaDetails";
-import FrenteEnfermagem from "./pages/FrenteEnfermagem";
-import FrenteEnfermagemDetails from "./pages/FrenteEnfermagemDetails";
-import FrenteMedica from "./pages/FrenteMedica";
-import FrenteMedicaDetails from "./pages/FrenteMedicaDetails";
-import Glosas from "./pages/Glosas";
-import GlosaDetails from "./pages/GlosaDetails";
-import Backoffice from "./pages/Backoffice";
+import ControlTower from './pages/ControlTower';
+import FrenteAdministrativa from './pages/FrenteAdministrativa';
+import FrenteAdministrativaDetails from './pages/FrenteAdministrativaDetails';
+import FrenteEnfermagem from './pages/FrenteEnfermagem';
+import FrenteEnfermagemDetails from './pages/FrenteEnfermagemDetails';
+import FrenteMedica from './pages/FrenteMedica';
+import FrenteMedicaDetails from './pages/FrenteMedicaDetails';
+import Glosas from './pages/Glosas';
+import GlosaDetails from './pages/GlosaDetails';
+import Backoffice from './pages/Backoffice';
 
 // Components
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import AppLayout from "./components/layout/AppLayout";
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import RequireRole from './components/auth/RequireRole';
+import AppLayout from './components/layout/AppLayout';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,22 +56,29 @@ const queryClient = new QueryClient({
 
 const msalInstance = new PublicClientApplication(msalConfig);
 
-// Wrapper para rotas com sidebar
-const WithLayout = ({ children }: { children: React.ReactNode }) => (
+interface ProtectedPageProps {
+  children: React.ReactNode;
+  module?: AppModule;
+  profiles?: UserProfile[];
+}
+
+const ProtectedPage = ({ children, module, profiles }: ProtectedPageProps) => (
   <ProtectedRoute>
-    <AppLayout>{children}</AppLayout>
+    <RequireRole module={module} profiles={profiles}>
+      <AppLayout>{children}</AppLayout>
+    </RequireRole>
   </ProtectedRoute>
 );
 
 const AppContent = () => {
   useTokenRenewal();
-  
+
   return (
     <BrowserRouter>
       <Routes>
         {/* Rotas públicas */}
         <Route path="/login" element={<Login />} />
-        
+
         {/* Seleção de hospital (sem sidebar - tela de transição) */}
         <Route path="/select-hospital" element={
           <ProtectedRoute>
@@ -80,41 +92,41 @@ const AppContent = () => {
 
         {/* Central de Contas (Home após login) */}
         <Route path="/central-contas" element={
-          <WithLayout><ControlTower /></WithLayout>
+          <ProtectedPage module="central-contas"><ControlTower /></ProtectedPage>
         } />
         {/* Manter rota antiga para compatibilidade */}
         <Route path="/control-tower" element={<Navigate to="/central-contas" replace />} />
 
         {/* Frente Administrativa */}
         <Route path="/frente-administrativa" element={
-          <WithLayout><FrenteAdministrativa /></WithLayout>
+          <ProtectedPage module="frente-administrativa"><FrenteAdministrativa /></ProtectedPage>
         } />
         <Route path="/frente-administrativa/:id" element={
-          <WithLayout><FrenteAdministrativaDetails /></WithLayout>
+          <ProtectedPage module="frente-administrativa"><FrenteAdministrativaDetails /></ProtectedPage>
         } />
 
         {/* Frente de Enfermagem */}
         <Route path="/frente-enfermagem" element={
-          <WithLayout><FrenteEnfermagem /></WithLayout>
+          <ProtectedPage module="frente-enfermagem"><FrenteEnfermagem /></ProtectedPage>
         } />
         <Route path="/frente-enfermagem/:id" element={
-          <WithLayout><FrenteEnfermagemDetails /></WithLayout>
+          <ProtectedPage module="frente-enfermagem"><FrenteEnfermagemDetails /></ProtectedPage>
         } />
 
         {/* Frente Médica */}
         <Route path="/frente-medica" element={
-          <WithLayout><FrenteMedica /></WithLayout>
+          <ProtectedPage module="frente-medica"><FrenteMedica /></ProtectedPage>
         } />
         <Route path="/frente-medica/:id" element={
-          <WithLayout><FrenteMedicaDetails /></WithLayout>
+          <ProtectedPage module="frente-medica"><FrenteMedicaDetails /></ProtectedPage>
         } />
 
         {/* Glosas e Recursos */}
         <Route path="/glosas" element={
-          <WithLayout><Glosas /></WithLayout>
+          <ProtectedPage module="glosas"><Glosas /></ProtectedPage>
         } />
         <Route path="/glosas/:id" element={
-          <WithLayout><GlosaDetails /></WithLayout>
+          <ProtectedPage module="glosas"><GlosaDetails /></ProtectedPage>
         } />
 
         {/* ==================== */}
@@ -123,17 +135,17 @@ const AppContent = () => {
 
         {/* Backoffice */}
         <Route path="/backoffice" element={
-          <WithLayout><Backoffice /></WithLayout>
+          <ProtectedPage module="backoffice"><Backoffice /></ProtectedPage>
         } />
 
         {/* Painel Gerencial */}
         <Route path="/gerencial" element={
-          <WithLayout><ManagerialDashboard /></WithLayout>
+          <ProtectedPage module="gerencial"><ManagerialDashboard /></ProtectedPage>
         } />
-        
+
         {/* Assistente IA */}
         <Route path="/gerencial/chat" element={
-          <WithLayout><ManagerialChat /></WithLayout>
+          <ProtectedPage module="gerencial-chat"><ManagerialChat /></ProtectedPage>
         } />
 
         {/* ==================== */}
@@ -142,39 +154,47 @@ const AppContent = () => {
 
         {/* Auditor */}
         <Route path="/audits" element={
-          <WithLayout><Audits /></WithLayout>
+          <ProtectedPage module="auditor-legado"><Audits /></ProtectedPage>
         } />
         <Route path="/audit/new" element={
-          <WithLayout><NewAudit /></WithLayout>
+          <ProtectedPage module="auditor-legado"><NewAudit /></ProtectedPage>
         } />
         <Route path="/guia/:id" element={
-          <WithLayout><GuiaDetails /></WithLayout>
+          <ProtectedPage module="auditor-legado"><GuiaDetails /></ProtectedPage>
         } />
 
         {/* Analista */}
         <Route path="/analista" element={
-          <WithLayout><Analista /></WithLayout>
+          <ProtectedPage module="analista-legado"><Analista /></ProtectedPage>
         } />
         <Route path="/analista/:guideId" element={
-          <WithLayout><AnalistaDetails /></WithLayout>
+          <ProtectedPage module="analista-legado"><AnalistaDetails /></ProtectedPage>
         } />
 
         {/* Contratos */}
         <Route path="/contracts" element={
-          <WithLayout><Contracts /></WithLayout>
+          <ProtectedPage module="backoffice"><Contracts /></ProtectedPage>
         } />
         <Route path="/contracts/:id" element={
-          <WithLayout><ContractDetailsNew /></WithLayout>
+          <ProtectedPage module="backoffice"><ContractDetailsNew /></ProtectedPage>
         } />
 
         {/* TMI Report */}
         <Route path="/tmi-report" element={
-          <WithLayout><TMIReport /></WithLayout>
+          <ProtectedPage module="gerencial"><TMIReport /></ProtectedPage>
         } />
 
-        {/* Rota raiz - redireciona para Central de Contas */}
+        {/* Conta e administração IAM */}
+        <Route path="/perfil" element={
+          <ProtectedPage><Perfil /></ProtectedPage>
+        } />
+        <Route path="/admin/papeis" element={
+          <ProtectedPage profiles={['admin', 'diretor']}><PapeisAdmin /></ProtectedPage>
+        } />
+
+        {/* Rota raiz - redireciona para login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
-        
+
         {/* Rota antiga de módulos - redireciona para Central de Contas */}
         <Route path="/modules" element={
           <ProtectedRoute>
@@ -191,11 +211,13 @@ const AppContent = () => {
 const App = () => (
   <MsalProvider instance={msalInstance}>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AppContent />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AppContent />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </MsalProvider>
 );

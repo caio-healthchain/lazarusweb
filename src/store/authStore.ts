@@ -17,7 +17,7 @@ export interface AuthProfile {
   name: string;
   description?: string | null;
   allowedModules?: string[];
-  permissions?: string[];
+  permissions?: string[] | Record<string, unknown>;
 }
 
 export interface AuthHospital {
@@ -75,6 +75,8 @@ interface AuthState {
   refreshSession: () => Promise<string | null>;
   logout: (options?: { remote?: boolean }) => Promise<void> | void;
   getValidAccessToken: () => Promise<string | null>;
+  hasRole: (role: UserRole | UserRole[]) => boolean;
+  hasPermission: (permission: string) => boolean;
 }
 
 const authEndpoint = (path: string) => `${API_CONFIG.authBaseUrl}${path}`;
@@ -113,11 +115,30 @@ const shouldRefreshToken = (token: string | null, thresholdSeconds = 60 * 60) =>
   return Date.now() >= (payload.exp - thresholdSeconds) * 1000;
 };
 
+const BACKEND_ROLE_MAP: Record<string, UserRole> = {
+  ADMIN: 'admin',
+  TENANT_ADMIN: 'admin',
+  DIRETOR: 'diretor',
+  MEDICO: 'medico',
+  MÉDICO: 'medico',
+  ENFERMEIRO: 'enfermeiro',
+  ANALISTA: 'analista',
+  AUDITOR: 'auditor',
+  GERENCIAL: 'gerencial',
+};
+
+export const toUserRole = (code?: string | null): UserRole | null => {
+  if (!code) return null;
+
+  const normalized = code.trim().toUpperCase();
+  return BACKEND_ROLE_MAP[normalized] || (code.trim().toLowerCase() as UserRole);
+};
+
 const normalizeRolesFromHospitals = (hospitals: HospitalAccess[] = []): UserRole[] => {
   const roleSet = new Set<UserRole>();
 
   hospitals.forEach((entry) => {
-    const profileCode = entry?.profile?.code as UserRole | undefined;
+    const profileCode = toUserRole(entry?.profile?.code);
     if (profileCode) roleSet.add(profileCode);
   });
 
@@ -130,7 +151,7 @@ const normalizeUser = (user: LoginResponse['user'], hospitals: HospitalAccess[])
   name: user.name,
   email: user.email,
   avatar: user.avatar,
-  roles: user.roles?.length ? user.roles : normalizeRolesFromHospitals(hospitals),
+  roles: user.roles?.length ? user.roles.map((role) => toUserRole(role)).filter(Boolean) as UserRole[] : normalizeRolesFromHospitals(hospitals),
 });
 
 export const useAuthStore = create<AuthState>()(
@@ -302,6 +323,32 @@ export const useAuthStore = create<AuthState>()(
         }
 
         return token;
+      },
+
+      hasRole: (role) => {
+        const requiredRoles = Array.isArray(role) ? role : [role];
+        const userRoles = get().user?.roles || [];
+        return requiredRoles.some((requiredRole) => userRoles.includes(requiredRole));
+      },
+
+      hasPermission: (permission) => {
+        const profiles = get().selectedProfiles.length
+          ? get().selectedProfiles
+          : get().hospitals.map((entry) => entry.profile).filter(Boolean);
+
+        return profiles.some((profile) => {
+          const permissions = profile.permissions;
+
+          if (Array.isArray(permissions)) {
+            return permissions.includes(permission);
+          }
+
+          if (permissions && typeof permissions === 'object') {
+            return Boolean((permissions as Record<string, unknown>)[permission]);
+          }
+
+          return false;
+        });
       },
     }),
     {

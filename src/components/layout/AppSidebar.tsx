@@ -14,8 +14,9 @@ import {
   SidebarFooter,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import UserAvatar from '@/components/auth/UserAvatar';
+import RoleBadge from '@/components/auth/RoleBadge';
 import {
   LayoutDashboard,
   ClipboardList,
@@ -32,6 +33,8 @@ import {
   ChevronUp,
   Hospital,
   Brain,
+  UserCircle,
+  LockKeyhole,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -141,6 +144,7 @@ const AppSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { hasAccess, currentProfile } = useRBACStore();
+  const canManageIam = ['admin', 'diretor'].includes(currentProfile);
   const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
@@ -177,15 +181,6 @@ const AppSidebar = () => {
           </SidebarMenuButton>
         </SidebarMenuItem>
       ));
-  };
-
-  const getUserInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .substring(0, 2)
-      .toUpperCase();
   };
 
   const workflowItems = renderNavItems(WORKFLOW_ITEMS);
@@ -257,6 +252,28 @@ const AppSidebar = () => {
           </SidebarGroup>
         )}
 
+        <SidebarGroup>
+          <SidebarGroupLabel>Conta</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton onClick={() => navigate('/perfil')} isActive={isActive('/perfil')} tooltip="Meu Perfil">
+                  <UserCircle className="h-4 w-4" />
+                  <span>Meu Perfil</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              {canManageIam && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => navigate('/admin/papeis')} isActive={isActive('/admin/papeis')} tooltip="Administração de Papéis">
+                    <LockKeyhole className="h-4 w-4" />
+                    <span>Administração IAM</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
         {/* Módulos Legado */}
         {legadoItems.length > 0 && (
           <SidebarGroup>
@@ -274,15 +291,10 @@ const AppSidebar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton className="h-auto py-2">
-                  <Avatar className="h-7 w-7">
-                    <AvatarImage src={user?.avatar} />
-                    <AvatarFallback className="bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs">
-                      {user?.name ? getUserInitials(user.name) : 'U'}
-                    </AvatarFallback>
-                  </Avatar>
+                  <UserAvatar name={user?.name} avatar={user?.avatar} className="h-7 w-7" />
                   <div className="flex flex-col items-start group-data-[collapsible=icon]:hidden">
                     <span className="text-sm font-medium truncate max-w-[140px]">{user?.name || 'Usuário'}</span>
-                    <span className="text-xs text-muted-foreground">{PROFILE_LABELS[currentProfile]}</span>
+                    <RoleBadge role={currentProfile} label={PROFILE_LABELS[currentProfile]} className="h-4 px-1.5 text-[10px] mt-0.5 w-fit" />
                   </div>
                   <ChevronUp className="ml-auto h-4 w-4 group-data-[collapsible=icon]:hidden" />
                 </SidebarMenuButton>
@@ -292,9 +304,7 @@ const AppSidebar = () => {
                   <p className="text-sm font-medium">{user?.name}</p>
                   <p className="text-xs text-muted-foreground">{user?.email}</p>
                   <div className="flex items-center gap-1 mt-1">
-                    <Badge variant="secondary" className="text-xs">
-                      {PROFILE_LABELS[currentProfile]}
-                    </Badge>
+                    <RoleBadge role={currentProfile} label={PROFILE_LABELS[currentProfile]} />
                     <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700">
                       <Sparkles className="h-2.5 w-2.5 mr-1" />
                       IA Ativa

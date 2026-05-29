@@ -3,8 +3,9 @@ import AppSidebar from './AppSidebar';
 import AIFloatingChat from '../ai/AIFloatingChat';
 import { useAuthStore } from '@/store/authStore';
 import { useRBACStore, PROFILE_LABELS } from '@/store/rbacStore';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import UserAvatar from '@/components/auth/UserAvatar';
+import RoleBadge from '@/components/auth/RoleBadge';
 import { Separator } from '@/components/ui/separator';
 import {
   Breadcrumb,
@@ -31,6 +32,8 @@ const ROUTE_TITLES: Record<string, string> = {
   '/gerencial/chat': 'Assistente IA',
   '/audits': 'Auditor',
   '/analista': 'Analista',
+  '/perfil': 'Meu Perfil',
+  '/admin/papeis': 'Administração de Papéis',
 };
 
 const getPageTitle = (pathname: string): string => {
@@ -50,15 +53,6 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const { user } = useAuthStore();
   const { currentProfile } = useRBACStore();
   const pageTitle = getPageTitle(location.pathname);
-
-  const getUserInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
-      .substring(0, 2)
-      .toUpperCase();
-  };
 
   return (
     <SidebarProvider>
@@ -82,15 +76,10 @@ const AppLayout = ({ children }: AppLayoutProps) => {
               IA Ativa
             </Badge>
             <div className="flex items-center gap-2">
-              <Avatar className="h-7 w-7">
-                <AvatarImage src={user?.avatar} />
-                <AvatarFallback className="bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs">
-                  {user?.name ? getUserInitials(user.name) : 'U'}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar name={user?.name} avatar={user?.avatar} className="h-7 w-7" />
               <div className="hidden sm:flex flex-col">
                 <span className="text-xs font-medium leading-none">{user?.name}</span>
-                <span className="text-xs text-muted-foreground leading-none mt-0.5">{PROFILE_LABELS[currentProfile]}</span>
+                <RoleBadge role={currentProfile} label={PROFILE_LABELS[currentProfile]} className="h-4 px-1.5 text-[10px] mt-0.5 w-fit" />
               </div>
             </div>
           </div>

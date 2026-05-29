@@ -27,7 +27,6 @@ import { RejectModal } from '@/components/audit/RejectModal';
 import { calculatePendenciasStats, generateMockValidations } from '@/services/mockValidationData';
 import { exportGuiaXML } from '@/utils/xmlExporter';
 import { Download } from 'lucide-react';
-import { useState } from 'react';
 
 const GuiaDetailsNew = () => {
   const { id } = useParams<{ id: string }>();
