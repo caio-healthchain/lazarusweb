@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { API_CONFIG } from '@/config/auth';
 import { useAuthStore } from '@/store/authStore';
+import { applyTenantHeaders } from '@/services/tenantContext';
 import {
   MOCK_GUIDES,
   MOCK_PROCEDURES,
@@ -166,6 +167,8 @@ const createApiClient = (): AxiosInstance => {
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
+
+      applyTenantHeaders(config.headers);
 
       if (apiKey) {
         config.headers['X-API-Key'] = apiKey;

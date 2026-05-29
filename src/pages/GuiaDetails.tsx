@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { guideService, GuiaProcedure } from '@/services/api';
+import { withTenantContext } from '@/services/tenantContext';
 import { getAuditSessionName } from '@/lib/utils';
 import { toast } from 'sonner';
 import { 
@@ -61,7 +62,7 @@ const GuiaDetailsNew = () => {
     queryFn: async () => {
       const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://lazarusapi.azure-api.net';
       try {
-        const response = await fetch(`${baseUrl}/audits/audit-log/guia/${numeroGuiaPrestador}`);
+        const response = await fetch(`${baseUrl}/audits/audit-log/guia/${numeroGuiaPrestador}`, withTenantContext());
         if (!response.ok) {
           console.warn('Endpoint de logs não disponível, usando logs locais');
           return [];

@@ -1,4 +1,6 @@
 // CBHPM RAG Service - Integração com sistema RAG de procedimentos médicos
+import { withTenantContext } from '@/services/tenantContext';
+
 export interface CBHPMProcedure {
   codigo: string;
   procedimento: string;
@@ -43,7 +45,7 @@ class CBHPMRagService {
     } = {}
   ): Promise<CBHPMSearchResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/ask`, {
+      const response = await fetch(`${this.baseURL}/ask`, withTenantContext({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +55,7 @@ class CBHPMRagService {
           method: options.method || 'hybrid',
           top_k: options.top_k || 5
         })
-      });
+      }));
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -69,7 +71,7 @@ class CBHPMRagService {
   // Integração com chat para consultas em linguagem natural
   async chatQuery(message: string): Promise<CBHPMChatResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/ask`, {
+      const response = await fetch(`${this.baseURL}/ask`, withTenantContext({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +79,7 @@ class CBHPMRagService {
         body: JSON.stringify({
           message: message
         })
-      });
+      }));
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -103,7 +105,7 @@ class CBHPMRagService {
   // Health check do serviço
   async healthCheck(): Promise<CBHPMHealthResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/health`);
+      const response = await fetch(`${this.baseURL}/health`, withTenantContext());
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -129,7 +131,7 @@ class CBHPMRagService {
   // Estatísticas do sistema
   async getStatistics(): Promise<any> {
     try {
-      const response = await fetch(`${this.baseURL}/api/v1/procedures/stats`);
+      const response = await fetch(`${this.baseURL}/api/v1/procedures/stats`, withTenantContext());
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { API_CONFIG } from '@/config/auth';
+import { useAuthStore } from '@/store/authStore';
+import { applyTenantHeaders } from '@/services/tenantContext';
 
 const DEMO_MODE = true;
 const delay = (ms: number = 300) => new Promise(r => setTimeout(r, ms));
@@ -186,10 +188,14 @@ const apiClient = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('authToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const { accessToken } = useAuthStore.getState();
+
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
+
+  applyTenantHeaders(config.headers);
+
   return config;
 });
 

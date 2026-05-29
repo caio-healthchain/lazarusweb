@@ -14,7 +14,7 @@ import {
   BreadcrumbPage,
 } from '@/components/ui/breadcrumb';
 import { useLocation } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
+import { Building2, Sparkles } from 'lucide-react';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -50,9 +50,12 @@ const getPageTitle = (pathname: string): string => {
 
 const AppLayout = ({ children }: AppLayoutProps) => {
   const location = useLocation();
-  const { user } = useAuthStore();
+  const { user, selectedHospital, tokenContext } = useAuthStore();
   const { currentProfile } = useRBACStore();
   const pageTitle = getPageTitle(location.pathname);
+  const contextHospitalId = selectedHospital?.id || String(tokenContext?.hospitalId || tokenContext?.tenantId || '');
+  const hospitalDisplayName = selectedHospital?.name || (contextHospitalId ? 'Hospital ativo' : 'Sem hospital ativo');
+  const hospitalDisplayCode = selectedHospital?.code || contextHospitalId;
 
   return (
     <SidebarProvider>
@@ -71,6 +74,14 @@ const AppLayout = ({ children }: AppLayoutProps) => {
           </Breadcrumb>
           
           <div className="ml-auto flex items-center gap-3">
+            <Badge
+              variant="outline"
+              className="hidden max-w-[280px] items-center gap-1.5 truncate border-blue-200 bg-blue-50 text-xs text-blue-700 md:flex"
+              title={hospitalDisplayCode ? `${hospitalDisplayName} (${hospitalDisplayCode})` : hospitalDisplayName}
+            >
+              <Building2 className="h-3 w-3 shrink-0" />
+              <span className="truncate">{hospitalDisplayName}</span>
+            </Badge>
             <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200 hidden sm:flex">
               <Sparkles className="h-3 w-3 mr-1" />
               IA Ativa
